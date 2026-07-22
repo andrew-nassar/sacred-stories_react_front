@@ -1,0 +1,6 @@
+{
+  "name": "Sacred Stories",
+  "description": "A digital sanctuary preserving the stories of modern Christian martyrs and saints with cinematic minimalism, historical depth, and interactive archival search.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

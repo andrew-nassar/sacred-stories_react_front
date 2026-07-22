@@ -1,0 +1,271 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom palette matching specs */
+  --color-canvas: #121414;
+  --color-gold-accent: #f2ca50;
+  --color-gold-dark: #d4af37;
+  --color-burgundy-accent: #8e0f28;
+  --color-burgundy-dark: #800020;
+  --color-on-surface: #e2e2e2;
+  --color-surface-container: #1e2020;
+  --color-surface-container-high: #282a2b;
+}
+
+/* Light Mode Overrides */
+html.light {
+  --color-canvas: #faf8f5;
+  --color-on-surface: #1e2020;
+  --color-surface-container: #f0ede8;
+  --color-surface-container-high: #e5e0d8;
+  color-scheme: light;
+}
+
+/* Light Theme Text & Class Overrides to maintain readability without changing desktop logic */
+html.light .text-white {
+  color: #1a1c1d !important;
+}
+html.light .text-white\/90 {
+  color: rgba(26, 28, 29, 0.9) !important;
+}
+html.light .text-white\/85 {
+  color: rgba(26, 28, 29, 0.85) !important;
+}
+html.light .text-white\/80 {
+  color: rgba(26, 28, 29, 0.8) !important;
+}
+html.light .text-white\/75 {
+  color: rgba(26, 28, 29, 0.75) !important;
+}
+html.light .text-white\/70 {
+  color: rgba(26, 28, 29, 0.7) !important;
+}
+html.light .text-white\/65 {
+  color: rgba(26, 28, 29, 0.65) !important;
+}
+html.light .text-white\/60 {
+  color: rgba(26, 28, 29, 0.6) !important;
+}
+html.light .text-white\/50 {
+  color: rgba(26, 28, 29, 0.5) !important;
+}
+html.light .text-white\/40 {
+  color: rgba(26, 28, 29, 0.4) !important;
+}
+html.light .text-white\/30 {
+  color: rgba(26, 28, 29, 0.3) !important;
+}
+html.light .text-white\/20 {
+  color: rgba(26, 28, 29, 0.2) !important;
+}
+html.light .text-gray-300 {
+  color: #374151 !important;
+}
+html.light .text-gray-400 {
+  color: #4b5563 !important;
+}
+
+/* Keep text white in containers marked with keep-white-text even in light mode */
+html.light .keep-white-text,
+html.light .keep-white-text .text-white {
+  color: #ffffff !important;
+}
+html.light .keep-white-text .text-white\/90 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+html.light .keep-white-text .text-white\/85 {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+html.light .keep-white-text .text-white\/80 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+html.light .keep-white-text .text-white\/75 {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+html.light .keep-white-text .text-white\/70 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+html.light .keep-white-text .text-white\/65 {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+html.light .keep-white-text .text-white\/60 {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+html.light .keep-white-text .text-white\/50 {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+html.light .keep-white-text .text-white\/40 {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+html.light .keep-white-text .text-white\/30 {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+html.light .keep-white-text .text-white\/20 {
+  color: rgba(255, 255, 255, 0.2) !important;
+}
+html.light .keep-white-text .text-gray-300 {
+  color: #d1d5db !important;
+}
+html.light .keep-white-text .text-gray-400 {
+  color: #9ca3af !important;
+}
+html.light .keep-white-text .glass-panel {
+  background: rgba(20, 22, 22, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html.light .keep-white-text .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+html.light .keep-white-text .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Light mode overrides for hardcoded dark background sections */
+html.light .bg-\[\#0c0f0f\],
+html.light .bg-\[\#0d0f0f\],
+html.light .bg-\[\#0d0d0d\] {
+  background-color: #faf8f5 !important;
+}
+
+/* Specific elements inside the Saint details page in light mode */
+html.light #lex-hero-section {
+  background-color: #faf8f5 !important;
+}
+html.light #lex-hero-section .bg-black {
+  background-color: #faf8f5 !important;
+}
+html.light #lex-hero-section .bg-gradient-to-t {
+  background-image: linear-gradient(to top, #faf8f5, transparent, transparent) !important;
+}
+html.light #lex-hero-section .md\:bg-gradient-to-r {
+  background-image: linear-gradient(to right, transparent, #faf8f5) !important;
+}
+
+html.light #lex-biography-section .bg-\[\#0d0f0f\],
+html.light #lex-biography-section .bg-\[\#0d0f0f\]:hover {
+  background-color: #f5f2eb !important;
+  border-color: rgba(18, 20, 20, 0.12) !important;
+}
+
+html.light #lex-timeline-section .bg-black {
+  background-color: #faf8f5 !important;
+}
+
+html.light #lex-location-showcase {
+  background-color: #f5f2eb !important;
+  border-color: rgba(18, 20, 20, 0.12) !important;
+}
+
+html.light .bg-white\/5 {
+  background-color: rgba(26, 28, 29, 0.05) !important;
+}
+html.light .bg-white\/10 {
+  background-color: rgba(26, 28, 29, 0.08) !important;
+}
+html.light .bg-white\/15 {
+  background-color: rgba(26, 28, 29, 0.12) !important;
+}
+html.light .bg-black\/40 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+html.light .bg-black\/60 {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+}
+html.light .border-white\/10 {
+  border-color: rgba(26, 28, 29, 0.12) !important;
+}
+html.light .border-white\/5 {
+  border-color: rgba(26, 28, 29, 0.06) !important;
+}
+html.light .border-white\/20 {
+  border-color: rgba(26, 28, 29, 0.2) !important;
+}
+
+html.light .glass-panel {
+  background: rgba(240, 240, 235, 0.8) !important;
+  border: 1px solid rgba(18, 20, 20, 0.15) !important;
+}
+html.light .glass-panel-hover:hover {
+  background: rgba(230, 230, 225, 0.95) !important;
+  border-color: rgba(242, 202, 80, 0.6) !important;
+}
+
+html.light input, html.light textarea, html.light select {
+  background-color: rgba(26, 28, 29, 0.04) !important;
+  color: #121414 !important;
+  border-color: rgba(26, 28, 29, 0.15) !important;
+}
+html.light input::placeholder, html.light textarea::placeholder {
+  color: rgba(26, 28, 29, 0.45) !important;
+}
+
+html.light .scrollbar-track {
+  background: #faf8f5 !important;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #faf8f5 !important;
+}
+
+/* Glassmorphism custom components */
+.glass-panel {
+  background: rgba(20, 22, 22, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-hover {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  background: rgba(26, 28, 28, 0.7);
+  border-color: rgba(242, 202, 80, 0.35);
+  box-shadow: 0 12px 40px -12px rgba(242, 202, 80, 0.15);
+}
+
+.glow-gold {
+  box-shadow: 0 0 35px -5px rgba(242, 202, 80, 0.15);
+}
+
+.glow-burgundy {
+  box-shadow: 0 0 35px -5px rgba(142, 15, 40, 0.2);
+}
+
+.glow-navy {
+  box-shadow: 0 0 35px -5px rgba(0, 31, 63, 0.25);
+}
+
+/* Fade out section divider */
+.fade-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(242, 202, 80, 0.25) 50%, transparent);
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #121414;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 202, 80, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(242, 202, 80, 0.4);
+}
+
+/* Equalizer animation for Liturgy Player indicator */
+@keyframes equalize {
+  0%, 100% { height: 4px; }
+  50% { height: 18px; }
+}
+
+
