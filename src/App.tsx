@@ -4,8 +4,7 @@ import LiturgyPlayer from "./shared/components/LiturgyPlayer";
 import MobileAppLayout from "./shared/components/MobileAppLayout";
 import { SaintDetailModal, BespokePrayerModal } from "./shared/components/Modals";
 import PilgrimAuth from "./features/auth/components/PilgrimAuth";
-import { AuthProvider } from "./features/auth/store/authStore";
-import { SacredStoreProvider } from "./shared/store/sacredStore";
+import { AppProviders } from "./app/providers/AppProviders";
 import { useIsMobile } from "./shared/services/useIsMobile";
 import ArchivistChat from "./features/chat/ArchivistChat";
 import MainContent from "./features/navigation/MainContent";
@@ -50,10 +49,8 @@ function SanctuaryApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SacredStoreProvider>
-        <SanctuaryApp />
-      </SacredStoreProvider>
-    </AuthProvider>
+    <AppProviders>
+      <SanctuaryApp />
+    </AppProviders>
   );
 }
