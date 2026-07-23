@@ -1,17 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Search, Filter, Sparkles, BookOpen, MapPin, Award, BookOpenCheck, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { SAINTS_DATA, Saint } from "../../data";
 import { useSacredStore } from "../../shared/store/sacredStore";
-import { archivesAdapter, mapApiStoryToSaint } from "../../shared/services/archivesService";
+import { fetchSacredStories } from "../../shared/sacred_stories/services/sacredStoryService";
+import { SacredStoryItem } from "../../shared/sacred_stories/models/sacred_Story_model";
+import { archivesAdapter } from "../../shared/services/archivesService";
+
+// Local UI model for rendering cards
+export interface Saint {
+  id: string;
+  name: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  era: string;
+  location: string;
+  feastDay: string;
+  patronage: string;
+  colorTheme: string;
+  type?: number;
+}
+
+// Sacred Story Types mapping (0 to 5)
+const STORY_TYPES = [
+  { id: "all", label: "All Types" },
+  { id: 0, label: "Hermit (متوحد)" },
+  { id: 1, label: "Saint (قديس)" },
+  { id: 2, label: "Martyr (شهيد)" },
+  { id: 3, label: "Patriarch (بطريرك)" },
+  { id: 4, label: "Archpriest (قمص)" },
+  { id: 5, label: "Pope (بابا)" },
+];
+
+// Helper to map API items to local UI Saint model
+function mapApiStoryToSaint(item: SacredStoryItem): Saint {
+  return {
+    id: item.id,
+    name: item.name,
+    title: item.famousQuote || "Venerable Servant of God",
+    subtitle: item.famousQuote || "",
+    image: item.coverImage || "https://picsum.photos/640/480/?image=233",
+    era: "Historic",
+    location: "Global Archive",
+    feastDay: "Annual",
+    patronage: "Faith",
+    colorTheme: item.type === 2 ? "burgundy" : item.type === 0 ? "navy" : "gold",
+    type: item.type,
+  };
+}
 
 export default function SaintsExplorer() {
-  const { setSelectedSaint, setSelectedSaintId, setCurrentTab, searchQueryPass, setSearchQueryPass } = useSacredStore();
+  const { setSelectedSaintId, setCurrentTab, searchQueryPass, setSearchQueryPass } = useSacredStore();
 
-  const [searchQuery, setSearchQuery] = useState(searchQueryPass);
+  // Input & Filter state
+  const [searchInput, setSearchInput] = useState(searchQueryPass || "");
+  const [selectedType, setSelectedType] = useState<number | "all">("all");
   const [selectedTheme, setSelectedTheme] = useState<string>("all");
   const [selectedEra, setSelectedEra] = useState<string>("all");
-  const [saints, setSaints] = useState<Saint[]>(SAINTS_DATA);
+
+  // Pure API-driven state (no static local data fallback)
+  const [saints, setSaints] = useState<Saint[]>([]);
   const [isLoadingSaints, setIsLoadingSaints] = useState(false);
 
   // Gemini State
@@ -19,10 +67,10 @@ export default function SaintsExplorer() {
   const [synthesizedSaint, setSynthesizedSaint] = useState<Saint | null>(null);
   const [synthesisError, setSynthesisError] = useState<string | null>(null);
 
-  // Synchronize initial query
+  // Synchronize initial query pass
   useEffect(() => {
     if (searchQueryPass) {
-      setSearchQuery(searchQueryPass);
+      setSearchInput(searchQueryPass);
     }
   }, [searchQueryPass]);
 
@@ -31,59 +79,58 @@ export default function SaintsExplorer() {
     return () => {
       setSearchQueryPass("");
     };
+  }, [setSearchQueryPass]);
+
+  // Fetch API function - Called ONLY on explicit user action or mount
+  const executeApiSearch = useCallback(async (query: string, typeVal: number | "all") => {
+    setIsLoadingSaints(true);
+    try {
+      const response = await fetchSacredStories({
+        searchTerm: query.trim() || undefined,
+        type: typeVal !== "all" ? typeVal : undefined,
+        pageSize: 12,
+      });
+
+      if (response && response.succeeded && response.data && response.data.items) {
+        const mapped = response.data.items.map(mapApiStoryToSaint);
+        setSaints(mapped);
+      } else {
+        setSaints([]);
+      }
+    } catch (err) {
+      console.error("API Error fetching stories:", err);
+      setSaints([]);
+    } finally {
+      setIsLoadingSaints(false);
+    }
   }, []);
 
-  // API Fetch for Sacred Stories
+  // Initial load on mount
   useEffect(() => {
-    let active = true;
-    async function fetchSaints() {
-      setIsLoadingSaints(true);
-      try {
-        const response = await archivesAdapter.getSacredStories({
-          searchTerm: searchQuery || undefined,
-        });
-        if (active) {
-          if (response && response.succeeded && response.data && response.data.items) {
-            const mapped = response.data.items.map(mapApiStoryToSaint);
-            setSaints(mapped);
-          } else {
-            setSaints(SAINTS_DATA);
-          }
-        }
-      } catch (err) {
-        if (active) {
-          console.log("No deployed custom API detected, or local API is currently offline. Falling back to built-in Martyrology database.");
-          setSaints(SAINTS_DATA);
-        }
-      } finally {
-        if (active) {
-          setIsLoadingSaints(false);
-        }
-      }
-    }
-    fetchSaints();
+    executeApiSearch(searchInput, selectedType);
+  }, []);
 
-    return () => {
-      active = false;
-    };
-  }, [searchQuery]);
+  // Trigger search on Click or Enter
+  const handleExecuteSearch = () => {
+    executeApiSearch(searchInput, selectedType);
+  };
 
-  // Load detailed saint from API on select
+  // Type Filter change trigger
+  const handleTypeChange = (typeId: number | "all") => {
+    setSelectedType(typeId);
+    executeApiSearch(searchInput, typeId);
+  };
+
+  // Select saint for details
   const handleSelectSaint = (saint: Saint) => {
     setSelectedSaintId(saint.id);
     setCurrentTab("saint-details");
   };
 
-  // Filter logic
+  // Local filtering for Era & Theme
   const filteredSaints = saints.filter((saint) => {
-    const matchesSearch = 
-      saint.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      saint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      saint.patronage.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      saint.location.toLowerCase().includes(searchQuery.toLowerCase());
-    
     const matchesTheme = selectedTheme === "all" || saint.colorTheme === selectedTheme;
-    
+
     let matchesEra = true;
     if (selectedEra !== "all") {
       if (selectedEra === "20th") {
@@ -95,25 +142,24 @@ export default function SaintsExplorer() {
       }
     }
 
-    return matchesSearch && matchesTheme && matchesEra;
+    return matchesTheme && matchesEra;
   });
 
   // Dynamic saint synthesis via server proxy adapter
   const handleSynthesizeSaint = async () => {
-    if (!searchQuery.trim()) return;
+    if (!searchInput.trim()) return;
 
     setIsSynthesizing(true);
     setSynthesisError(null);
     setSynthesizedSaint(null);
 
     try {
-      const data = await archivesAdapter.searchArchives(searchQuery);
+      const data = await archivesAdapter.searchArchives(searchInput);
 
       if (data.saint) {
         setSynthesizedSaint(data.saint);
-        // Automatically add to list so user can search it again during this session!
-        if (!saints.some(s => s.name.toLowerCase() === data.saint.name.toLowerCase())) {
-          setSaints(prev => [data.saint, ...prev]);
+        if (!saints.some((s) => s.name.toLowerCase() === data.saint.name.toLowerCase())) {
+          setSaints((prev) => [data.saint, ...prev]);
         }
       } else {
         throw new Error("No record found for this search.");
@@ -128,7 +174,6 @@ export default function SaintsExplorer() {
 
   return (
     <div className="max-w-6xl mx-auto py-12 px-4 relative z-10">
-      
       {/* Search Header */}
       <div className="text-center mb-12">
         <span className="font-mono text-xs text-gold-accent tracking-[0.25em] uppercase block mb-3">
@@ -145,23 +190,33 @@ export default function SaintsExplorer() {
       {/* Main Search & Filter Interface */}
       <div className="glass-panel rounded-xl p-6 md:p-8 mb-12 flex flex-col gap-6 border border-white/5 shadow-xl">
         <div className="flex flex-col md:flex-row gap-4 items-stretch">
-          {/* Search bar */}
+          {/* Search bar with explicit Search Trigger button */}
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by name, patronage, location, or try 'St. Joan of Arc'..."
-              className="w-full bg-black/40 border border-white/10 rounded-lg pl-12 pr-4 py-3.5 text-white placeholder-white/40 font-sans text-sm focus:outline-none focus:border-gold-accent/50 transition-all duration-300"
-              onKeyDown={(e) => e.key === "Enter" && handleSynthesizeSaint()}
+              className="w-full bg-black/40 border border-white/10 rounded-lg pl-4 pr-12 py-3.5 text-white placeholder-white/40 font-sans text-sm focus:outline-none focus:border-gold-accent/50 transition-all duration-300"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleExecuteSearch();
+                }
+              }}
             />
+            <button
+              onClick={handleExecuteSearch}
+              title="Execute Search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white/40 hover:text-gold-accent hover:bg-white/10 rounded-md transition-all duration-200"
+            >
+              <Search className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Dynamic AI Synthesis Button */}
           <button
             onClick={handleSynthesizeSaint}
-            disabled={isSynthesizing || !searchQuery.trim()}
+            disabled={isSynthesizing || !searchInput.trim()}
             className="px-6 py-3.5 rounded-lg bg-gradient-to-r from-gold-dark via-gold-accent to-amber-400 hover:from-gold-accent hover:to-amber-300 text-canvas disabled:from-white/5 disabled:to-white/5 disabled:text-white/30 disabled:cursor-not-allowed font-mono text-xs tracking-wider uppercase font-semibold flex items-center justify-center gap-2 transition-all duration-300 active:scale-95"
             title="Ask Gemini to retrieve/synthesize historical record from theological logs"
           >
@@ -180,58 +235,82 @@ export default function SaintsExplorer() {
         </div>
 
         {/* Quick filters row */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/5">
-          {/* Theme Filters */}
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest flex items-center gap-1.5">
-              <Filter className="w-3 h-3 text-gold-accent/70" /> THEME:
+        <div className="flex flex-col gap-4 pt-4 border-t border-white/5">
+          {/* Story Types Filters (0 to 5) */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest flex items-center gap-1.5 shrink-0">
+              <Filter className="w-3 h-3 text-gold-accent/70" /> TYPE:
             </span>
-            <div className="flex gap-2">
-              {[
-                { id: "all", label: "All" },
-                { id: "gold", label: "Humility/Gold" },
-                { id: "burgundy", label: "Martyrdom/Red" },
-                { id: "navy", label: "Contemplation/Blue" },
-              ].map((theme) => (
+            <div className="flex flex-wrap gap-2">
+              {STORY_TYPES.map((type) => (
                 <button
-                  key={theme.id}
-                  onClick={() => setSelectedTheme(theme.id)}
+                  key={type.id}
+                  onClick={() => handleTypeChange(type.id as number | "all")}
                   className={`px-3 py-1 rounded-md text-xs font-sans transition-all duration-300 ${
-                    selectedTheme === theme.id
+                    selectedType === type.id
                       ? "bg-gold-accent/15 text-gold-accent border border-gold-accent/30"
                       : "bg-white/5 text-white/60 border border-transparent hover:text-white hover:bg-white/10"
                   }`}
                 >
-                  {theme.label}
+                  {type.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Era Filters */}
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
-              ERA:
-            </span>
-            <div className="flex gap-2">
-              {[
-                { id: "all", label: "All" },
-                { id: "historic", label: "Pre-20th C" },
-                { id: "20th", label: "20th Century" },
-                { id: "21st", label: "21st Century" },
-              ].map((era) => (
-                <button
-                  key={era.id}
-                  onClick={() => setSelectedEra(era.id)}
-                  className={`px-3 py-1 rounded-md text-xs font-sans transition-all duration-300 ${
-                    selectedEra === era.id
-                      ? "bg-gold-accent/15 text-gold-accent border border-gold-accent/30"
-                      : "bg-white/5 text-white/60 border border-transparent hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {era.label}
-                </button>
-              ))}
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+            {/* Theme Filters */}
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
+                THEME:
+              </span>
+              <div className="flex gap-2">
+                {[
+                  { id: "all", label: "All" },
+                  { id: "gold", label: "Humility/Gold" },
+                  { id: "burgundy", label: "Martyrdom/Red" },
+                  { id: "navy", label: "Contemplation/Blue" },
+                ].map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => setSelectedTheme(theme.id)}
+                    className={`px-3 py-1 rounded-md text-xs font-sans transition-all duration-300 ${
+                      selectedTheme === theme.id
+                        ? "bg-gold-accent/15 text-gold-accent border border-gold-accent/30"
+                        : "bg-white/5 text-white/60 border border-transparent hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    {theme.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Era Filters */}
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
+                ERA:
+              </span>
+              <div className="flex gap-2">
+                {[
+                  { id: "all", label: "All" },
+                  { id: "historic", label: "Pre-20th C" },
+                  { id: "20th", label: "20th Century" },
+                  { id: "21st", label: "21st Century" },
+                ].map((era) => (
+                  <button
+                    key={era.id}
+                    onClick={() => setSelectedEra(era.id)}
+                    className={`px-3 py-1 rounded-md text-xs font-sans transition-all duration-300 ${
+                      selectedEra === era.id
+                        ? "bg-gold-accent/15 text-gold-accent border border-gold-accent/30"
+                        : "bg-white/5 text-white/60 border border-transparent hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    {era.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -251,10 +330,12 @@ export default function SaintsExplorer() {
               <div className="w-56 h-56 rounded-full border-2 border-gold-accent animate-spin-slow" />
               <div className="w-44 h-44 rounded-full border border-gold-accent border-dashed animate-spin-reverse absolute" />
             </div>
-            
+
             <Sparkles className="w-10 h-10 text-gold-accent animate-pulse mx-auto mb-4" />
             <h3 className="font-serif text-xl text-white font-medium mb-2">Unlocking the Heavenly Registers</h3>
-            <p className="text-white/60 text-xs font-mono mb-4">Querying theological codices for: &ldquo;{searchQuery}&rdquo;</p>
+            <p className="text-white/60 text-xs font-mono mb-4">
+              Querying theological codices for: &ldquo;{searchInput}&rdquo;
+            </p>
             <div className="h-1.5 w-48 bg-white/10 rounded-full mx-auto overflow-hidden">
               <div className="h-full bg-gradient-to-r from-gold-dark via-gold-accent to-amber-300 w-2/3 rounded-full animate-[shimmer_1.5s_infinite_linear]" />
             </div>
@@ -282,7 +363,7 @@ export default function SaintsExplorer() {
           >
             {/* Top halo detail */}
             <div className="absolute right-0 top-0 w-32 h-32 bg-gold-accent/5 rounded-full blur-3xl pointer-events-none" />
-            
+
             <div className="flex flex-col md:flex-row gap-6 items-center">
               {/* Photo representation */}
               <div className="w-32 h-44 md:w-40 md:h-52 rounded-lg overflow-hidden border border-gold-accent/20 relative shrink-0">
@@ -358,9 +439,12 @@ export default function SaintsExplorer() {
         <AnimatePresence>
           {filteredSaints.length > 0 ? (
             filteredSaints.map((saint) => {
-              const borderTheme = 
-                saint.colorTheme === "burgundy" ? "hover:border-burgundy-accent/40" :
-                saint.colorTheme === "gold" ? "hover:border-gold-accent/40" : "hover:border-blue-500/35";
+              const borderTheme =
+                saint.colorTheme === "burgundy"
+                  ? "hover:border-burgundy-accent/40"
+                  : saint.colorTheme === "gold"
+                  ? "hover:border-gold-accent/40"
+                  : "hover:border-blue-500/35";
 
               return (
                 <motion.div
@@ -421,9 +505,11 @@ export default function SaintsExplorer() {
           ) : (
             <div className="col-span-full py-16 text-center">
               <BookOpenCheck className="w-12 h-12 text-white/20 mx-auto mb-4" />
-              <p className="font-serif text-white/70 text-lg mb-2">No local records match your search criteria</p>
+              <p className="font-serif text-white/70 text-lg mb-2">
+                {isLoadingSaints ? "Loading records..." : "No records match your search criteria"}
+              </p>
               <p className="text-white/40 text-xs font-sans max-w-md mx-auto">
-                Use the <span className="text-gold-accent font-semibold font-mono">DYNAMIC SYNTHESIS</span> button above to query the deep archives and compile a biography for &ldquo;{searchQuery}&rdquo;.
+                Use the <span className="text-gold-accent font-semibold font-mono">DYNAMIC SYNTHESIS</span> button above to query the deep archives and compile a biography for &ldquo;{searchInput}&rdquo;.
               </p>
             </div>
           )}

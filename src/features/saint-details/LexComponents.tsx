@@ -264,6 +264,7 @@ export function SacredTimeline({
 // 4. LocationShowcase Component (Image 4)
 // ==========================================
 interface LocationShowcaseProps {
+  sectionTitle?: string; // عنوان القسم الرئيسي (اختياري)
   title: string;
   desc: string;
   locationText: string;
@@ -272,6 +273,7 @@ interface LocationShowcaseProps {
 }
 
 export function LocationShowcase({
+  sectionTitle,
   title,
   desc,
   locationText,
@@ -279,51 +281,67 @@ export function LocationShowcase({
   language,
 }: LocationShowcaseProps) {
   const isAr = language === "ar";
-  
+  const defaultHeader = isAr ? "المزار الروحي والمقام" : "Spiritual Sanctuary";
+
   return (
-    <section id="lex-location-showcase" className={`glass-panel rounded-2xl overflow-hidden border border-white/5 bg-[#0d0f0f] p-6 md:p-10 shadow-xl ${isAr ? "[direction:rtl]" : "[direction:ltr]"}`}>
-      <div className="flex flex-col md:flex-row gap-8 items-center">
-        {/* Left side: Text blocks & metadata */}
-        <div className="flex-1 space-y-6 text-start">
-          <div className="space-y-3">
-            <span className="font-mono text-[10px] text-[#D4AF37] tracking-widest uppercase flex items-center gap-1.5 justify-start">
-              <Compass className="w-4 h-4 text-[#D4AF37]" />
-              {isAr ? "المزار الروحي والمقام" : "The Spiritual Sanctuary"}
-            </span>
-            <h3 className="font-serif text-2xl md:text-3xl font-semibold text-white tracking-wide">
-              {title}
-            </h3>
-          </div>
+    <section 
+      id="lex-location-showcase" 
+      className={`space-y-8 ${isAr ? "[direction:rtl]" : "[direction:ltr]"}`}
+    >
+      {/* 1. Centered Section Title matching screenshot design */}
+      <div className="text-center">
+        <h2 className="font-serif text-3xl md:text-4xl text-white font-semibold tracking-wide">
+          {sectionTitle || defaultHeader}
+        </h2>
+        <div className="w-16 h-[2px] bg-[#D4AF37] mx-auto mt-4" />
+      </div>
 
-          <p className="text-white/70 font-sans text-xs md:text-sm leading-relaxed text-justify font-light">
-            {desc}
-          </p>
+      {/* 2. Location Content Card */}
+      <div className="glass-panel rounded-2xl overflow-hidden border border-white/5 bg-[#0d0f0f] p-6 md:p-10 shadow-xl">
+        <div className="flex flex-col md:flex-row gap-8 items-center">
+          
+          {/* Text & Metadata */}
+          <div className="flex-1 space-y-6 text-start">
+            <div className="space-y-3">
+              <span className="font-mono text-[10px] text-[#D4AF37] tracking-widest uppercase flex items-center gap-1.5 justify-start">
+                <Compass className="w-4 h-4 text-[#D4AF37]" />
+                {isAr ? "الموقع الجغرافي والمزار" : "The Sacred Sanctuary"}
+              </span>
+              <h3 className="font-serif text-2xl md:text-3xl font-semibold text-white tracking-wide">
+                {title}
+              </h3>
+            </div>
 
-          {/* Clean location badge with gold map pin */}
-          <div className="flex flex-wrap gap-3">
-            <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 font-mono text-xs text-[#D4AF37]">
-              <MapPin className="w-4 h-4 shrink-0 text-[#D4AF37]" />
-              <span>{locationText}</span>
+            <p className="text-white/70 font-sans text-xs md:text-sm leading-relaxed text-justify font-light">
+              {desc}
+            </p>
+
+            {/* Location Badge */}
+            <div className="flex flex-wrap gap-3">
+              <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 font-mono text-xs text-[#D4AF37]">
+                <MapPin className="w-4 h-4 shrink-0 text-[#D4AF37]" />
+                <span>{locationText}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right side: Cinematic architectural photo */}
-        <div className="w-full md:w-5/12 aspect-[16/11] md:h-72 rounded-xl overflow-hidden border border-white/10 bg-black shrink-0 relative group shadow-lg shadow-black/40">
-          <img
-            src={image}
-            alt={title}
-            className="w-full h-full object-cover md:grayscale brightness-90 md:group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-          <div className="absolute inset-0 border border-white/10 rounded-xl group-hover:border-[#D4AF37]/30 transition-all duration-500 pointer-events-none" />
+          {/* Photo */}
+          <div className="w-full md:w-5/12 aspect-[16/11] md:h-72 rounded-xl overflow-hidden border border-white/10 bg-black shrink-0 relative group shadow-lg shadow-black/40">
+            <img
+              src={image}
+              alt={title}
+              className="w-full h-full object-cover md:grayscale brightness-90 md:group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            <div className="absolute inset-0 border border-white/10 rounded-xl group-hover:border-[#D4AF37]/30 transition-all duration-500 pointer-events-none" />
+          </div>
+
         </div>
       </div>
     </section>
   );
 }
-
 // ==========================================
 // 5. SacredGallery Component (Image 5)
 // ==========================================
