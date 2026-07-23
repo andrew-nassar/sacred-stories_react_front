@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { 
-  Compass, Search, User, Sparkles, MapPin, Calendar, Info, Sun, Moon, 
-  Volume2, VolumeX, Menu, X, Heart
+  Compass, Search, MapPin, Calendar, Info, Sun, Moon, 
+  Volume2, Menu, X, Heart
 } from "lucide-react";
 import { useSacredStore, TabId } from "../../shared/store/sacredStore";
-import { useAuthStore } from "../../features/auth/store/authStore";
 import { translations } from "../../shared/translations/translations";
 import { motion, AnimatePresence } from "motion/react";
 import Footer from "./Footer";
@@ -32,7 +31,6 @@ export default function MobileAppLayout({ onOpenAuthModal }: MobileAppLayoutProp
     setIsAmbientPlaying
   } = useSacredStore();
 
-  const { user } = useAuthStore();
   const t = translations[language];
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -121,49 +119,25 @@ export default function MobileAppLayout({ onOpenAuthModal }: MobileAppLayoutProp
 
               {/* Pilgrim Card */}
               <div className="mb-6">
-                {user.isRegistered ? (
-                  <div className="glass-panel border border-gold-accent/30 bg-gold-accent/[0.02] p-4 rounded-xl shadow-lg relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-gold-accent/5 rounded-full blur-xl pointer-events-none" />
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-gold-accent font-semibold block mb-1">
-                      {language === "ar" ? "باحث مسجل" : "Registered Scholar"}
-                    </span>
-                    <h4 className="font-serif text-base font-bold text-white truncate">{user.name}</h4>
-                    {user.baptismalName && (
-                      <p className="text-white/60 text-xs mt-0.5">
-                        {language === "ar" ? `اسم المعمودية: ${user.baptismalName}` : `Baptismal: ${user.baptismalName}`}
-                      </p>
-                    )}
-                    <button
-                      onClick={() => {
-                        setIsDrawerOpen(false);
-                        onOpenAuthModal();
-                      }}
-                      className="mt-3 w-full py-1.5 rounded border border-white/10 bg-white/5 hover:bg-white/10 text-white/90 text-xs font-mono tracking-wide uppercase transition-all cursor-pointer"
-                    >
-                      {language === "ar" ? "إدارة الجلسة" : "Manage Session"}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="glass-panel border border-white/10 bg-white/[0.01] p-4 rounded-xl">
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-white/40 block mb-1">
-                      {language === "ar" ? "زائر عابر" : "Guest Traveler"}
-                    </span>
-                    <p className="text-white/60 text-xs mb-3 font-light">
-                      {language === "ar" 
-                        ? "سجل في الأرشيف المقدس لحفظ نياتك الروحية" 
-                        : "Register to coordinate spiritual intentions."}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setIsDrawerOpen(false);
-                        onOpenAuthModal();
-                      }}
-                      className="w-full py-2.5 rounded-lg bg-gold-accent text-[#0c0f0f] font-mono text-[11px] font-bold tracking-widest uppercase hover:bg-white hover:text-[#0c0f0f] transition-all cursor-pointer shadow-md shadow-gold-accent/10"
-                    >
-                      {language === "ar" ? "سجل كحاج" : "Register Pilgrim"}
-                    </button>
-                  </div>
-                )}
+                <div className="glass-panel border border-white/10 bg-white/[0.01] p-4 rounded-xl">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-white/40 block mb-1">
+                    {language === "ar" ? "زائر عابر" : "Guest Traveler"}
+                  </span>
+                  <p className="text-white/60 text-xs mb-3 font-light">
+                    {language === "ar" 
+                      ? "سجل في الأرشيف المقدس لحفظ نياتك الروحية" 
+                      : "Register to coordinate spiritual intentions."}
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIsDrawerOpen(false);
+                      onOpenAuthModal();
+                    }}
+                    className="w-full py-2.5 rounded-lg bg-gold-accent text-[#0c0f0f] font-mono text-[11px] font-bold tracking-widest uppercase hover:bg-white hover:text-[#0c0f0f] transition-all cursor-pointer shadow-md shadow-gold-accent/10"
+                  >
+                    {language === "ar" ? "سجل كحاج" : "Register Pilgrim"}
+                  </button>
+                </div>
               </div>
 
               {/* Navigation Site Map */}
@@ -301,7 +275,6 @@ export default function MobileAppLayout({ onOpenAuthModal }: MobileAppLayoutProp
           </>
         )}
       </AnimatePresence>
-
 
       {/* Main Content Area */}
       <div className="flex-grow">

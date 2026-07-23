@@ -1,25 +1,30 @@
-import React, { useState } from "react";
+import React from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./shared/components/Navbar";
 import LiturgyPlayer from "./shared/components/LiturgyPlayer";
 import MobileAppLayout from "./shared/components/MobileAppLayout";
 import { BespokePrayerModal } from "./shared/components/Modals";
-import PilgrimAuth from "./features/auth/components/PilgrimAuth";
 import { AppProviders } from "./app/providers/AppProviders";
 import { useIsMobile } from "./shared/services/useIsMobile";
 import ArchivistChat from "./features/chat/ArchivistChat";
 import MainContent from "./features/navigation/MainContent";
+import { LoginPage, RegisterPage } from "./features/auth"; // استيراد صفحات الدخول والتسجيل المستقلة
 
 function SanctuaryApp() {
   const isMobile = useIsMobile();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // دالة تحويل المستخدم إلى صفحة تسجيل الدخول المستقلة
+  const handleOpenAuth = () => {
+    navigate("/login");
+  };
 
   if (isMobile) {
     return (
       <div className="min-h-screen bg-canvas text-white/90 font-sans relative selection:bg-gold-accent/30 selection:text-white">
-        <MobileAppLayout onOpenAuthModal={() => setIsAuthModalOpen(true)} />
+        <MobileAppLayout onOpenAuthModal={handleOpenAuth} />
         <LiturgyPlayer />
         <BespokePrayerModal />
-        <PilgrimAuth isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       </div>
     );
   }
@@ -29,7 +34,7 @@ function SanctuaryApp() {
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
 
-      <Navbar onOpenAuthModal={() => setIsAuthModalOpen(true)} />
+      <Navbar onOpenAuthModal={handleOpenAuth} />
       
       {/* Dynamic Views */}
       <MainContent />
@@ -40,7 +45,6 @@ function SanctuaryApp() {
       {/* Persistent Audio Player & Modals */}
       <LiturgyPlayer />
       <BespokePrayerModal />
-      <PilgrimAuth isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   );
 }
@@ -48,7 +52,18 @@ function SanctuaryApp() {
 export default function App() {
   return (
     <AppProviders>
-      <SanctuaryApp />
+      <BrowserRouter>
+        <Routes>
+          {/* الصفحة الرئيسية للترقية والتصفح */}
+          <Route path="/*" element={<SanctuaryApp />} />
+
+          {/* صفحة تسجيل الدخول كمكون/صفحة مستقلة بالكامل */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* صفحة إنشاء حساب مستقلة بالكامل */}
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
+      </BrowserRouter>
     </AppProviders>
   );
 }

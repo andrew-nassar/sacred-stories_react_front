@@ -1,14 +1,11 @@
 import React, { useState } from "react";
-import { X, Calendar, Award, Quote, Sparkles, RefreshCw, Compass, Heart } from "lucide-react";
+import { X, Sparkles, RefreshCw, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Saint } from "../../data";
 import { useSacredStore } from "../store/sacredStore";
-import { useAuthStore } from "../../features/auth/store/authStore";
 import { archivesAdapter } from "../services/archivesService";
 
 export function BespokePrayerModal() {
-  const { isPrayerModalOpen, setIsPrayerModalOpen, defaultSaintForPrayer, setDefaultSaintForPrayer } = useSacredStore();
-  const { user } = useAuthStore();
+  const { isPrayerModalOpen, setIsPrayerModalOpen, defaultSaintForPrayer } = useSacredStore();
 
   const [situation, setSituation] = useState("");
   const [saintSelection, setSaintSelection] = useState(defaultSaintForPrayer);
@@ -30,13 +27,7 @@ export function BespokePrayerModal() {
     setGeneratedReflection(null);
 
     try {
-      // Personalize prompt based on Pilgrim registry if authenticated
-      let situationalContext = situation;
-      if (user.isRegistered) {
-        situationalContext += `\n[Pilgrim Session: Praying on behalf of ${user.name}${user.baptismalName ? ` (baptismal name: ${user.baptismalName})` : ""}. Their core spiritual journey intent is: ${user.spiritualFocus || "to seek silent wisdom"}]`;
-      }
-
-      const data = await archivesAdapter.generateReflection(situationalContext, saintSelection);
+      const data = await archivesAdapter.generateReflection(situation, saintSelection);
       setGeneratedReflection(data.reflection);
     } catch (err: any) {
       console.error(err);
@@ -130,16 +121,6 @@ export function BespokePrayerModal() {
           ) : (
             /* Input Form */
             <form onSubmit={handleGenerateReflection} className="space-y-6">
-              {/* User Greeting badge */}
-              {user.isRegistered && (
-                <div className="bg-gold-accent/5 border border-gold-accent/20 rounded p-3 text-xs flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-gold-accent shrink-0 animate-spin-slow" />
-                  <span className="text-white/80">
-                    Welcome back, <strong className="text-gold-accent">{user.name}</strong>. Your custom prayer will automatically integrate your daily intent: <em className="text-white/60">&ldquo;{user.spiritualFocus || "contemplation"}&rdquo;</em>.
-                  </span>
-                </div>
-              )}
-
               {/* Intention Input */}
               <div>
                 <label className="block font-mono text-[10px] text-white/50 uppercase tracking-widest mb-2">

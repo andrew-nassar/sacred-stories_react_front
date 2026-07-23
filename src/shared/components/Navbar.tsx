@@ -2,7 +2,6 @@ import React from "react";
 import { Search, User, Sparkles, Compass, Sun, Moon } from "lucide-react";
 import { motion } from "motion/react";
 import { useSacredStore, TabId } from "../../shared/store/sacredStore";
-import { useAuthStore } from "../../features/auth/store/authStore";
 import { translations } from "../../shared/translations/translations";
 
 interface NavbarProps {
@@ -11,7 +10,6 @@ interface NavbarProps {
 
 export default function Navbar({ onOpenAuthModal }: NavbarProps) {
   const { currentTab, setCurrentTab, setIsPrayerModalOpen, setSearchQueryPass, language, setLanguage, theme, setTheme } = useSacredStore();
-  const { user } = useAuthStore();
   const t = translations[language];
 
   const navItems: { id: TabId; label: string }[] = [
@@ -107,17 +105,10 @@ export default function Navbar({ onOpenAuthModal }: NavbarProps) {
         {/* Profile / Spiritual Companion */}
         <button
           onClick={onOpenAuthModal}
-          className={`flex items-center gap-1 p-1.5 md:p-2 rounded-full text-white/70 hover:text-gold-accent hover:bg-white/5 transition-all duration-300 shrink-0 ${
-            user.isRegistered ? "text-gold-accent bg-gold-accent/5 px-2 md:px-3" : ""
-          }`}
+          className="flex items-center gap-1 p-1.5 md:p-2 rounded-full text-white/70 hover:text-gold-accent hover:bg-white/5 transition-all duration-300 shrink-0"
           title="Archival Journal"
         >
           <User className="w-4 h-4 md:w-5 md:h-5" />
-          {user.isRegistered && (
-            <span className="hidden lg:inline font-mono text-[10px] uppercase text-white/85 tracking-widest font-semibold truncate max-w-[80px]">
-              {user.name.split(" ")[0]}
-            </span>
-          )}
         </button>
       </div>
     </header>
