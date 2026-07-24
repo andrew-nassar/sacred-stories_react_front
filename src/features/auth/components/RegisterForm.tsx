@@ -20,7 +20,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   } = useForm<RegisterSchemaType>({
     resolver: zodResolver(registerSchema) as any,
     defaultValues: {
-      fullName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -30,11 +29,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
   const onSubmit = async (data: RegisterSchemaType) => {
     const result = await submitRegister({
-      fullName: data.fullName,
       email: data.email,
       password: data.password,
-      confirmPassword: data.confirmPassword,
-      acceptTerms: data.acceptTerms,
     });
 
     if (result && onSuccess) {
@@ -54,33 +50,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           </div>
         </div>
       )}
-
-      {/* Full Name */}
-      <div className="space-y-1">
-        <label
-          htmlFor="register-name"
-          className="font-mono-label text-[11px] uppercase tracking-wider text-[#99907c] flex items-center gap-1.5"
-        >
-          <span className="material-symbols-outlined text-[16px]">badge</span>
-          ARCHIVIST NAME
-        </label>
-        <input
-          id="register-name"
-          type="text"
-          placeholder="e.g. Brother Thomas"
-          className={`input-glass w-full rounded-lg px-4 py-3 text-[#e2e2e2] font-sans-body placeholder:text-[#d0c5af]/30 text-sm ${
-            errors.fullName || fieldErrors?.fullName ? 'border-[#ffb4ab]' : ''
-          }`}
-          {...register('fullName')}
-        />
-        {errors.fullName && (
-          <p className="font-sans-body text-xs text-[#ffb4ab] mt-1 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[14px]">error</span>
-            {errors.fullName.message}
-          </p>
-        )}
-      </div>
-
       {/* Email */}
       <div className="space-y-1">
         <label
