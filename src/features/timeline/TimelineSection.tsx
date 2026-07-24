@@ -68,11 +68,11 @@ export default function TimelineSection() {
 
                 {/* Event Card Content */}
                 <div className="glass-panel rounded-lg p-5 ml-8 md:ml-12 border border-white/5 hover:border-gold-accent/20 transition-all duration-300 shadow-md">
-                  <div className="flex items-center justify-between gap-4 mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 mb-2">
                     <h3 className="font-serif text-lg md:text-xl font-medium text-white group-hover:text-gold-accent transition-colors duration-300">
                       {event.title}
                     </h3>
-                    <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase bg-white/5 border border-white/10 px-2 py-0.5 rounded shrink-0">
+                    <span className="text-[10px] font-mono tracking-widest text-white/40 uppercase bg-white/5 border border-white/10 px-2 py-0.5 rounded self-start sm:self-auto shrink-0">
                       {event.subtitle}
                     </span>
                   </div>

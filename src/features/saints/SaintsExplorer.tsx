@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Search, Filter, Sparkles, BookOpen, MapPin, Award, BookOpenCheck, RefreshCw } from "lucide-react";
+import { Search, Filter, Sparkles, BookOpen, MapPin, Award, BookOpenCheck, RefreshCw, SlidersHorizontal, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useSacredStore } from "../../shared/store/sacredStore";
 import { fetchSacredStories } from "../../shared/sacred_stories/services/sacredStoryService";
@@ -57,6 +57,7 @@ export default function SaintsExplorer() {
   const [selectedType, setSelectedType] = useState<number | "all">("all");
   const [selectedTheme, setSelectedTheme] = useState<string>("all");
   const [selectedEra, setSelectedEra] = useState<string>("all");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Pure API-driven state (no static local data fallback)
   const [saints, setSaints] = useState<Saint[]>([]);
@@ -173,22 +174,22 @@ export default function SaintsExplorer() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-12 px-4 relative z-10">
+    <div className="max-w-6xl mx-auto py-6 sm:py-12 px-4 relative z-10">
       {/* Search Header */}
-      <div className="text-center mb-12">
-        <span className="font-mono text-xs text-gold-accent tracking-[0.25em] uppercase block mb-3">
+      <div className="text-center mb-6 md:mb-12">
+        <span className="font-mono text-[10px] sm:text-xs text-gold-accent tracking-[0.25em] uppercase block mb-1 md:mb-3">
           The Scriptorium
         </span>
-        <h2 className="font-serif text-3xl md:text-5xl font-semibold text-white mb-4">
+        <h2 className="font-serif text-2xl sm:text-3xl md:text-5xl font-semibold text-white mb-2 md:mb-4">
           Martyrology Search
         </h2>
-        <p className="text-white/60 font-sans max-w-xl mx-auto text-sm leading-relaxed">
+        <p className="text-white/60 font-sans max-w-xl mx-auto text-xs sm:text-sm leading-snug sm:leading-relaxed hidden sm:block">
           Search our curated library of modern heroes, or query the dynamic archives to retrieve comprehensive hagiographies of any saint or martyr.
         </p>
       </div>
 
-      {/* Main Search & Filter Interface */}
-      <div className="glass-panel rounded-xl p-6 md:p-8 mb-12 flex flex-col gap-6 border border-white/5 shadow-xl">
+      {/* Desktop Search & Filter Interface (Unchanged Desktop Layout) */}
+      <div className="hidden md:flex glass-panel rounded-xl p-6 md:p-8 mb-12 flex-col gap-6 border border-white/5 shadow-xl">
         <div className="flex flex-col md:flex-row gap-4 items-stretch">
           {/* Search bar with explicit Search Trigger button */}
           <div className="relative flex-1">
@@ -260,11 +261,11 @@ export default function SaintsExplorer() {
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
             {/* Theme Filters */}
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest shrink-0">
                 THEME:
               </span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {[
                   { id: "all", label: "All" },
                   { id: "gold", label: "Humility/Gold" },
@@ -274,7 +275,7 @@ export default function SaintsExplorer() {
                   <button
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme.id)}
-                    className={`px-3 py-1 rounded-md text-xs font-sans transition-all duration-300 ${
+                    className={`px-2.5 sm:px-3 py-1 rounded-md text-xs font-sans transition-all duration-300 ${
                       selectedTheme === theme.id
                         ? "bg-gold-accent/15 text-gold-accent border border-gold-accent/30"
                         : "bg-white/5 text-white/60 border border-transparent hover:text-white hover:bg-white/10"
@@ -287,11 +288,11 @@ export default function SaintsExplorer() {
             </div>
 
             {/* Era Filters */}
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest shrink-0">
                 ERA:
               </span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {[
                   { id: "all", label: "All" },
                   { id: "historic", label: "Pre-20th C" },
@@ -301,7 +302,7 @@ export default function SaintsExplorer() {
                   <button
                     key={era.id}
                     onClick={() => setSelectedEra(era.id)}
-                    className={`px-3 py-1 rounded-md text-xs font-sans transition-all duration-300 ${
+                    className={`px-2.5 sm:px-3 py-1 rounded-md text-xs font-sans transition-all duration-300 ${
                       selectedEra === era.id
                         ? "bg-gold-accent/15 text-gold-accent border border-gold-accent/30"
                         : "bg-white/5 text-white/60 border border-transparent hover:text-white hover:bg-white/10"
@@ -315,6 +316,158 @@ export default function SaintsExplorer() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Search & Filter Interface (Photo 1 Design - Compact Mobile) */}
+      <div className="block md:hidden mb-6">
+        {/* Rounded Pill Input Bar */}
+        <div className="relative flex items-center bg-[#121414] border border-white/15 rounded-full px-4 py-2 shadow-xl focus-within:border-gold-accent/50 transition-colors">
+          <button onClick={handleExecuteSearch} className="p-1 text-gold-accent hover:text-yellow-400 transition-colors shrink-0">
+            <Search className="w-4 h-4" />
+          </button>
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search the sanctuary..."
+            className="w-full bg-transparent border-none outline-none text-white text-xs sm:text-sm placeholder-white/40 font-sans px-2 focus:outline-none focus:ring-0"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleExecuteSearch();
+              }
+            }}
+          />
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            title="Filter Sanctuary"
+            className="p-1 text-gold-accent/80 hover:text-gold-accent transition-colors shrink-0"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Sanctuary Popup Modal (Photo 2 Design) */}
+      <AnimatePresence>
+        {isFilterOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-xs sm:max-w-sm bg-[#121414] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6 text-left overflow-y-auto max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-serif text-2xl font-bold text-gold-accent tracking-tight">
+                    Filter Sanctuary
+                  </h3>
+                  <div className="w-10 h-1 bg-gold-accent/60 rounded-full mt-2" />
+                </div>
+                <button
+                  onClick={() => setIsFilterOpen(false)}
+                  className="p-1.5 text-white/40 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Section 1: SEARCH TYPE */}
+              <div>
+                <span className="font-mono text-[10px] text-white/50 tracking-[0.2em] uppercase block mb-3 font-semibold">
+                  SEARCH TYPE
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "all", label: "All Types" },
+                    { id: 1, label: "Saint" },
+                    { id: 0, label: "Hermit" },
+                    { id: 2, label: "Martyr" },
+                  ].map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => handleTypeChange(type.id as number | "all")}
+                      className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all duration-200 ${
+                        selectedType === type.id
+                          ? "bg-[#252216] text-gold-accent border border-gold-accent/70 font-medium shadow-sm"
+                          : "bg-[#1f2223] text-white/60 border border-transparent hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 2: HISTORICAL ERA */}
+              <div>
+                <span className="font-mono text-[10px] text-white/50 tracking-[0.2em] uppercase block mb-3 font-semibold">
+                  HISTORICAL ERA
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "all", label: "Eternal" },
+                    { id: "historic", label: "Early Church" },
+                    { id: "medieval", label: "Medieval" },
+                    { id: "20th", label: "Modern" },
+                  ].map((era) => (
+                    <button
+                      key={era.id}
+                      onClick={() => setSelectedEra(era.id)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all duration-200 ${
+                        selectedEra === era.id
+                          ? "bg-[#252216] text-gold-accent border border-gold-accent/70 font-medium shadow-sm"
+                          : "bg-[#1f2223] text-white/60 border border-transparent hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {era.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section 3: WISDOM THEME */}
+              <div>
+                <span className="font-mono text-[10px] text-white/50 tracking-[0.2em] uppercase block mb-3 font-semibold">
+                  WISDOM THEME
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "all", label: "Any Theme" },
+                    { id: "navy", label: "Silence" },
+                    { id: "gold", label: "Humility" },
+                    { id: "prayer", label: "Prayer" },
+                    { id: "burgundy", label: "Sacrifice" },
+                  ].map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => setSelectedTheme(theme.id)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-sans transition-all duration-200 ${
+                        selectedTheme === theme.id
+                          ? "bg-[#252216] text-gold-accent border border-gold-accent/70 font-medium shadow-sm"
+                          : "bg-[#1f2223] text-white/60 border border-transparent hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {theme.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* APPLY FILTERS Button */}
+              <button
+                onClick={() => {
+                  handleExecuteSearch();
+                  setIsFilterOpen(false);
+                }}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-600 via-gold-accent to-yellow-500 hover:from-gold-accent hover:to-amber-400 text-canvas font-mono text-xs font-bold uppercase tracking-wider shadow-lg active:scale-98 transition-all mt-4"
+              >
+                APPLY FILTERS
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Synthesis Loader / Results Panel */}
       <AnimatePresence>

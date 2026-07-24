@@ -29,14 +29,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       {/* زر العودة للصفحة الرئيسية في الأعلى */}
       <Link
         to="/"
-        className="absolute top-6 left-6 z-20 flex items-center gap-2 font-mono text-xs text-[#99907c] hover:text-[#f2ca50] transition-colors uppercase tracking-wider"
+        className="absolute top-4 sm:top-6 left-4 sm:left-6 z-20 flex items-center gap-2 font-mono text-xs text-[#99907c] hover:text-[#f2ca50] transition-colors uppercase tracking-wider"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>Return to Sanctuary</span>
+        <span className="hidden sm:inline">Return to Sanctuary</span>
+        <span className="sm:hidden">Sanctuary</span>
       </Link>
 
       {/* Header */}
-      <div className="relative z-10 w-full max-w-md pt-4">
+      <div className="relative z-10 w-full max-w-md pt-10 sm:pt-4">
         <AuthHeader />
       </div>
 

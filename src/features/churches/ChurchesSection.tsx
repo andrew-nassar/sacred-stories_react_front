@@ -89,7 +89,7 @@ export default function ChurchesSection() {
       </div>
 
       {/* Contemplative full-screen sanctuary card */}
-      <div className="glass-panel rounded-xl p-8 md:p-12 border border-white/5 flex flex-col md:flex-row items-center gap-8 bg-gradient-to-br from-surface-container to-canvas relative overflow-hidden">
+      <div className="glass-panel rounded-xl p-5 sm:p-8 md:p-12 border border-white/5 flex flex-col md:flex-row items-center gap-6 sm:gap-8 bg-gradient-to-br from-surface-container to-canvas relative overflow-hidden">
         {/* Decorative thin gold lines */}
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-gold-accent/20 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-gold-accent/20 to-transparent" />

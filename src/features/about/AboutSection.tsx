@@ -6,7 +6,7 @@ export default function AboutSection() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 relative z-10">
       {/* Header */}
-      <div className="text-center mb-16">
+      <div className="text-center mb-10 sm:mb-16">
         <span className="font-mono text-xs text-gold-accent tracking-[0.25em] uppercase block mb-3">
           The Scriptorium Codex
         </span>
@@ -19,7 +19,7 @@ export default function AboutSection() {
       {/* Editorial Body */}
       <div className="space-y-12">
         {/* Intro */}
-        <div className="glass-panel rounded-xl p-8 md:p-12 border border-white/5 relative overflow-hidden">
+        <div className="glass-panel rounded-xl p-5 sm:p-8 md:p-12 border border-white/5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gold-accent/5 rounded-full blur-3xl pointer-events-none" />
           
           <h3 className="font-serif text-xl md:text-2xl text-white font-medium mb-4 italic">

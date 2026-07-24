@@ -46,15 +46,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* API Level Error Banner */}
       {error && (
-        <div className="p-4 rounded-lg bg-[#93000a]/20 border border-[#ffb4ab]/30 text-[#ffb4ab] text-xs font-sans-body flex items-start gap-3">
-          <span className="material-symbols-outlined text-[18px] shrink-0 text-[#ffb4ab]">
-            warning
-          </span>
-          <div className="flex-1">
-            <p className="font-semibold text-sm mb-0.5">Authentication Failure</p>
-            <p>{error}</p>
-          </div>
-        </div>
+        <div className="p-4 rounded-lg bg-[#93000a]/20 [.light_&]:bg-red-100/80 border border-[#ffb4ab]/30 [.light_&]:border-red-300 text-[#ffb4ab] [.light_&]:!text-[#800020] text-xs font-sans-body flex items-start gap-3">
+  <span className="material-symbols-outlined text-[18px] shrink-0 text-[#ffb4ab] [.light_&]:!text-[#800020]">
+    warning
+  </span>
+  <div className="flex-1">
+    <p className="font-semibold text-sm mb-0.5">Authentication Failure</p>
+    <p>{error}</p>
+  </div>
+</div>
       )}
 
       {/* Identity (Email) */}

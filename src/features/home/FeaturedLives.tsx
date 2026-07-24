@@ -39,13 +39,13 @@ export default function FeaturedLives() {
   }, []);
 
   return (
-    <section className="py-24 px-6 md:px-12 bg-canvas relative overflow-hidden">
+    <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 bg-canvas relative overflow-hidden">
       {/* Background soft ambient glows */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-burgundy-accent/5 blur-[90px] pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 w-[350px] h-[350px] rounded-full bg-navy/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[250px] sm:w-[350px] h-[250px] sm:h-[350px] rounded-full bg-burgundy-accent/5 blur-[90px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-[250px] sm:w-[350px] h-[250px] sm:h-[350px] rounded-full bg-navy/10 blur-[100px] pointer-events-none" />
 
       {/* Header */}
-      <div className="text-center mb-16 relative z-10">
+      <div className="text-center mb-10 sm:mb-16 relative z-10">
         <span className="font-mono text-xs text-gold-accent tracking-[0.3em] uppercase block mb-3">
           The Hall of Witness
         </span>
@@ -115,9 +115,9 @@ export default function FeaturedLives() {
                 )}
 
                 {/* Micro CTA interaction */}
-                <div className="hidden md:flex items-center gap-2 text-xs font-mono text-gold-accent md:opacity-0 md:group-hover:opacity-100 transform md:translate-y-2 md:group-hover:translate-y-0 transition-all duration-300 mt-2">
+                <div className="flex items-center gap-2 text-xs font-mono text-gold-accent opacity-100 md:opacity-0 md:group-hover:opacity-100 transform translate-y-0 md:translate-y-2 md:group-hover:translate-y-0 transition-all duration-300 mt-2">
                   <span>ENTER SANCTUARY</span>
-                  <ArrowRight className="w-3 h-3 md:group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </motion.div>
@@ -129,10 +129,10 @@ export default function FeaturedLives() {
       <div className="text-center mt-16 relative z-10">
         <button
           onClick={() => setCurrentTab("saints")}
-          className="inline-flex items-center gap-2 text-sm md:text-base font-mono tracking-widest uppercase text-gold-accent hover:text-white group transition-colors duration-300 cursor-pointer"
+          className="inline-flex items-center gap-2 text-sm md:text-base font-mono tracking-widest uppercase text-white hover:text-gold-accent group transition-colors duration-300 cursor-pointer keep-white-text"
         >
-          <span>View Complete Martyrology</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
+          <span className="text-white">View Complete Martyrology</span>
+          <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1.5 transition-transform duration-300" />
         </button>
       </div>
     </section>

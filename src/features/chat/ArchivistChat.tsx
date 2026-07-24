@@ -58,14 +58,14 @@ export default function ArchivistChat() {
   };
 
   return (
-    <div className="fixed bottom-24 right-6 z-40 flex flex-col items-end">
+    <div className="fixed bottom-24 right-3 sm:right-6 z-40 flex flex-col items-end">
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
-            className="w-[340px] md:w-[380px] h-[480px] rounded-xl overflow-hidden glass-panel border border-gold-accent/25 shadow-2xl flex flex-col mb-4 bg-gradient-to-b from-canvas to-black"
+            className="w-[calc(100vw-1.5rem)] max-w-[380px] sm:w-[340px] md:w-[380px] h-[480px] rounded-xl overflow-hidden glass-panel border border-gold-accent/25 shadow-2xl flex flex-col mb-4 bg-gradient-to-b from-canvas to-black"
           >
             {/* Chat Header */}
             <div className="px-5 py-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">

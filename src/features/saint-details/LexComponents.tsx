@@ -41,7 +41,7 @@ export function HeroSection({
       </div>
 
       {/* Details metadata (Right side) */}
-      <div className={`flex-1 p-8 md:p-14 flex flex-col justify-center bg-[#0c0f0f] relative gap-6 text-start ${isAr ? "[direction:rtl]" : "[direction:ltr]"}`}>
+      <div className={`flex-1 p-5 sm:p-8 md:p-14 flex flex-col justify-center bg-[#0c0f0f] relative gap-4 sm:gap-6 text-start ${isAr ? "[direction:rtl]" : "[direction:ltr]"}`}>
         <div className="space-y-4">
           {/* Dynamic badge with accent line */}
           <div className="flex items-center gap-3">
@@ -138,23 +138,23 @@ export function BiographySection({
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch mt-12">
         {/* Left card: Quote (Quote block) */}
-        <div className="md:col-span-4 bg-[#0d0f0f] border border-white/5 p-8 rounded-2xl flex flex-col justify-center text-center relative min-h-[250px] shadow-lg group hover:border-[#D4AF37]/20 transition-all duration-300">
-          <Quote className="w-16 h-16 text-[#D4AF37]/10 absolute -left-2 -top-2 transform -rotate-182" />
+        <div className="md:col-span-4 bg-[#0d0f0f] border border-white/5 p-5 sm:p-8 rounded-2xl flex flex-col justify-center text-center relative min-h-[200px] sm:min-h-[250px] shadow-lg group hover:border-[#D4AF37]/20 transition-all duration-300">
+          <Quote className="w-12 sm:w-16 h-12 sm:h-16 text-[#D4AF37]/10 absolute -left-2 -top-2 transform -rotate-182" />
           <div className="relative z-10 space-y-4">
-            <span className="text-[#D4AF37] font-serif text-5xl font-bold leading-none block mb-2 select-none">
+            <span className="text-[#D4AF37] font-serif text-4xl sm:text-5xl font-bold leading-none block mb-2 select-none">
               99
             </span>
-            <p className="text-[#D4AF37] font-serif text-lg md:text-xl font-medium leading-relaxed italic px-2">
+            <p className="text-[#D4AF37] font-serif text-base sm:text-lg md:text-xl font-medium leading-relaxed italic px-2">
               {quote}
             </p>
-            <p className="text-white/40 font-sans text-xs mt-6 uppercase tracking-wider block">
+            <p className="text-white/40 font-sans text-xs mt-4 sm:mt-6 uppercase tracking-wider block">
               {author}
             </p>
           </div>
         </div>
 
         {/* Right card: Structured bio paragraphs */}
-        <div className="md:col-span-8 bg-[#0d0f0f] border border-white/5 p-8 md:p-10 rounded-2xl flex flex-col justify-between shadow-lg relative group hover:border-white/10 transition-all duration-300 text-right">
+        <div className="md:col-span-8 bg-[#0d0f0f] border border-white/5 p-5 sm:p-8 md:p-10 rounded-2xl flex flex-col justify-between shadow-lg relative group hover:border-white/10 transition-all duration-300 text-right">
           <div className="space-y-6">
             <h3 className="font-serif text-xl font-bold text-white flex items-center gap-3 justify-start">
               <BookOpen className="w-5 h-5 text-[#D4AF37]" />
@@ -297,7 +297,7 @@ export function LocationShowcase({
       </div>
 
       {/* 2. Location Content Card */}
-      <div className="glass-panel rounded-2xl overflow-hidden border border-white/5 bg-[#0d0f0f] p-6 md:p-10 shadow-xl">
+      <div className="glass-panel rounded-2xl overflow-hidden border border-white/5 bg-[#0d0f0f] p-5 sm:p-8 md:p-10 shadow-xl">
         <div className="flex flex-col md:flex-row gap-8 items-center">
           
           {/* Text & Metadata */}

@@ -18,17 +18,17 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-6 py-20 overflow-hidden bg-gradient-to-b from-canvas via-canvas to-black/40">
+    <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 py-16 sm:py-20 overflow-hidden bg-gradient-to-b from-canvas via-canvas to-black/40">
       {/* Ambient background glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-gold-dark/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 left-1/3 w-[400px] h-[400px] rounded-full bg-burgundy-dark/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-gold-dark/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-10 left-1/3 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] rounded-full bg-burgundy-dark/5 blur-[100px] pointer-events-none" />
   
       {/* Decorative center icon or cross */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 0.4, scale: 1 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
-        className="mb-8"
+        className="mb-6 sm:mb-8"
       >
         <div className="w-12 h-12 rounded-full border border-gold-accent/30 flex items-center justify-center p-2">
           <Compass className="w-6 h-6 text-gold-accent animate-spin-slow" />
@@ -36,12 +36,12 @@ export default function HeroSection() {
       </motion.div>
   
       {/* Hero Headline */}
-      <div className="max-w-4xl mx-auto z-10">
+      <div className="max-w-4xl mx-auto z-10 w-full">
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.2 }}
-          className="font-serif text-4xl md:text-7xl font-bold tracking-tight text-white mb-2 leading-tight"
+          className="font-serif text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white mb-2 leading-tight break-words"
         >
           {t.heroHeadline}
         </motion.h1>
@@ -50,7 +50,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.4 }}
-          className="font-serif text-4xl md:text-7xl font-bold tracking-tight text-gold-accent mb-8 leading-tight italic"
+          className="font-serif text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight text-gold-accent mb-6 sm:mb-8 leading-tight italic break-words"
         >
           {t.heroHeadlineSub}
         </motion.h2>
@@ -73,11 +73,11 @@ export default function HeroSection() {
         className="flex flex-col sm:flex-row gap-4 items-center justify-center z-10 mb-20"
       >
         <button
-          onClick={handleExploreClick}
-          className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-gold-accent hover:bg-gold-dark text-[#0c0f0f] font-sans font-medium tracking-wider transition-all duration-300 transform hover:scale-[1.03] shadow-lg shadow-gold-accent/10 cursor-pointer"
-        >
-          {t.exploreSaints}
-        </button>
+  onClick={handleExploreClick}
+  className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-gold-accent hover:bg-gold-dark text-[#0c0f0f] [.light_&]:text-white font-sans font-medium tracking-wider transition-all duration-300 transform hover:scale-[1.03] shadow-lg shadow-gold-accent/10 cursor-pointer"
+>
+  {t.exploreSaints}
+</button>
   
         <button
           onClick={handleSearchClick}

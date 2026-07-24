@@ -129,14 +129,14 @@ export default function MobileAppLayout({ onOpenAuthModal }: MobileAppLayoutProp
                       : "Register to coordinate spiritual intentions."}
                   </p>
                   <button
-                    onClick={() => {
-                      setIsDrawerOpen(false);
-                      onOpenAuthModal();
-                    }}
-                    className="w-full py-2.5 rounded-lg bg-gold-accent text-[#0c0f0f] font-mono text-[11px] font-bold tracking-widest uppercase hover:bg-white hover:text-[#0c0f0f] transition-all cursor-pointer shadow-md shadow-gold-accent/10"
-                  >
-                    {language === "ar" ? "سجل كحاج" : "Register Pilgrim"}
-                  </button>
+  onClick={() => {
+    setIsDrawerOpen(false);
+    onOpenAuthModal();
+  }}
+  className="w-full py-2.5 rounded-lg bg-gold-accent text-[#0c0f0f] [.light_&]:text-white font-mono text-[11px] font-bold tracking-widest uppercase hover:bg-white hover:text-[#0c0f0f] transition-all cursor-pointer shadow-md shadow-gold-accent/10"
+>
+  {language === "ar" ? "سجل كحاج" : "Register Pilgrim"}
+</button>
                 </div>
               </div>
 
@@ -240,23 +240,30 @@ export default function MobileAppLayout({ onOpenAuthModal }: MobileAppLayoutProp
                 </div>
 
                 {/* Theme Selector Pill */}
-                <div className="flex items-center justify-between p-1 bg-black/30 border border-white/5 rounded-lg">
+                <div className="flex items-center justify-between p-1 bg-black/20 [.light_&]:bg-black/5 border border-white/10 [.light_&]:border-black/10 rounded-lg">
                   <button
+                    type="button"
                     onClick={() => setTheme("dark")}
                     className={`flex-1 py-1.5 rounded text-center text-[10px] font-mono flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      theme === "dark" ? "bg-gold-accent/15 text-gold-accent border border-gold-accent/30" : "text-white/60"
+                      theme === "dark"
+                        ? "bg-gold-accent/20 text-[#f2ca50] border border-gold-accent/40 font-bold"
+                        : "text-white/60 hover:text-white [.light_&]:text-gray-600 [.light_&]:hover:text-black"
                     }`}
                   >
-                    <Moon className="w-3.5 h-3.5" />
+                    <Moon className={`w-3.5 h-3.5 ${theme === "dark" ? "fill-current text-[#f2ca50]" : ""}`} />
                     <span>DARK</span>
                   </button>
+
                   <button
+                    type="button"
                     onClick={() => setTheme("light")}
                     className={`flex-1 py-1.5 rounded text-center text-[10px] font-mono flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      theme === "light" ? "bg-gold-accent/15 text-gold-accent border border-gold-accent/30" : "text-white/60"
+                      theme === "light"
+                        ? "bg-[#735c00] text-white font-bold shadow-sm"
+                        : "text-white/60 hover:text-white [.light_&]:text-gray-600 [.light_&]:hover:text-black"
                     }`}
                   >
-                    <Sun className="w-3.5 h-3.5" />
+                    <Sun className={`w-3.5 h-3.5 ${theme === "light" ? "fill-current text-white" : ""}`} />
                     <span>LIGHT</span>
                   </button>
                 </div>
