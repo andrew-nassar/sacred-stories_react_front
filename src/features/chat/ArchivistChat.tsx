@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageSquareCode, X, Send, BookOpen, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { archivesAdapter, ChatMessage } from "../../shared/services/archivesService";
+import { archivesAdapter, ChatMessage } from "../admin/services/archivesService";
 
 export default function ArchivistChat() {
   const [isChatOpen, setIsChatOpen] = useState(false);

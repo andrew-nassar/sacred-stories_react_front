@@ -16,7 +16,6 @@ import {
   LogOut
 } from 'lucide-react';
 import { PortalUser } from '../types';
-import { AuthService } from '../../../../services/auth.service';
 import { AuthApi } from '@/src/features/auth/api/auth.api';
 
 interface SidebarProps {

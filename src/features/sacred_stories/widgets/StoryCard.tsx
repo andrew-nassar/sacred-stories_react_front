@@ -4,7 +4,7 @@ import React from "react";
 import { MapPin, Award } from "lucide-react";
 import { motion } from "motion/react";
 import { Saint } from "../../../data";
-import { getSaintTypeLabel, getSaintTitleByType } from "../../../shared/services/archivesService";
+import { getSaintTypeLabel, getSaintTitleByType } from "../../admin/services/archivesService";
 
 interface StoryCardProps {
   saint: Saint;

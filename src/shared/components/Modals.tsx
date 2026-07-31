@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X, Sparkles, RefreshCw, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useSacredStore } from "../store/sacredStore";
-import { archivesAdapter } from "../services/archivesService";
+import { archivesAdapter } from "../../features/admin/services/archivesService";
 
 export function BespokePrayerModal() {
   const { isPrayerModalOpen, setIsPrayerModalOpen, defaultSaintForPrayer } = useSacredStore();

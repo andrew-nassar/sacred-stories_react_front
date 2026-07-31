@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { api } from './auth.service';
 import { ADMIN_CONFIG } from '../features/admin/shared/config';
+import { api } from './auth.service';
 
 export interface BackendMetrics {
   totalStoriesCount: number;
