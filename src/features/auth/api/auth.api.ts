@@ -40,9 +40,35 @@ export class AuthApi {
         AUTH_ENDPOINTS.LOGIN,
         data
       );
-      if (response.data?.data?.tokens) {
-        this.saveSession(response.data.data.tokens, response.data.data.user);
+
+      const loginData = response.data?.data;
+
+      if (loginData?.accessToken) {
+        // 1. Automatically calculate expiresIn (in seconds) from ISO expiration date
+        const expirationMs = loginData.refreshTokenExpiration
+          ? new Date(loginData.refreshTokenExpiration).getTime()
+          : 0;
+        
+        const expiresIn = expirationMs > 0
+          ? Math.max(0, Math.floor((expirationMs - Date.now()) / 1000))
+          : 0;
+
+        // 2. Save session with calculated expiresIn and standard 'Bearer' tokenType
+        this.saveSession(
+          {
+            accessToken: loginData.accessToken,
+            refreshToken: loginData.refreshToken,
+            expiresIn,
+            tokenType: 'Bearer',
+          },
+          {
+            userName: loginData.userName,
+            email: loginData.email,
+            role: loginData.role,
+          }
+        );
       }
+
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -113,18 +139,22 @@ export class AuthApi {
     }
   }
 
-  public static async logout(): Promise<ApiResponse<void>> {
+  public static async logout(): Promise<void> {
     try {
-      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-      const response = await authHttpClient.post<ApiResponse<void>>(
-        AUTH_ENDPOINTS.LOGOUT,
-        { refreshToken }
-      );
-      this.clearSession();
-      return response.data;
+      const accessToken = localStorage.getItem('accessToken') || '';
+      const refreshToken = localStorage.getItem('refreshToken') || '';
+
+      if (accessToken || refreshToken) {
+        await authHttpClient.post('/api/Auth/logout', {
+          accessToken,
+          refreshToken,
+        });
+      }
     } catch (error) {
+      console.error('Logout request failed on server:', error);
+    } finally {
+      // Clear tokens and stored session regardless of API success/failure
       this.clearSession();
-      throw this.handleError(error);
     }
   }
 

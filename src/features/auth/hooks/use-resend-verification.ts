@@ -29,7 +29,7 @@ export function useResendVerification(): UseResendVerificationResult {
 
       try {
         const response = await AuthApi.resendVerificationEmail({ email });
-        if (response.success) {
+        if (response.succeeded) {
           setIsSent(true);
           setIsLoading(false);
           return true;

@@ -30,7 +30,7 @@ export function useRefreshToken(): UseRefreshTokenResult {
         const response = await AuthApi.refreshToken({
           refreshToken: storedRefreshToken,
         });
-        if (response.success && response.data) {
+        if (response.succeeded && response.data) {
           setIsLoading(false);
           return response.data;
         } else {

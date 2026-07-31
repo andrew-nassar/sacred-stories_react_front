@@ -1,5 +1,6 @@
 export interface ApiResponse<T = void> {
-  success: boolean;
+  succeeded: boolean; 
+  statusCode: number;
   message: string;
   data?: T;
   errors?: Record<string, string[]>;

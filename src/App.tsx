@@ -9,6 +9,7 @@ import { useIsMobile } from "./shared/services/useIsMobile";
 import ArchivistChat from "./features/chat/ArchivistChat";
 import MainContent from "./features/navigation/MainContent";
 import { LoginPage, RegisterPage , ResendVerificationPage } from "./features/auth"; // استيراد صفحات الدخول والتسجيل المستقلة
+import AdminIndexPage from "./features/admin/AdminIndexPage";
 
 function SanctuaryApp() {
   const isMobile = useIsMobile();
@@ -59,7 +60,7 @@ export default function App() {
 
           {/* صفحة تسجيل الدخول كمكون/صفحة مستقلة بالكامل */}
           <Route path="/login" element={<LoginPage />} />
-
+          <Route path="/dashboard" element={<AdminIndexPage />} />
           {/* صفحة إنشاء حساب مستقلة بالكامل */}
           <Route path="/register" element={<RegisterPage />} />
           {/* صفحة إعادة إرسال البريد الإلكتروني للتحقق */}

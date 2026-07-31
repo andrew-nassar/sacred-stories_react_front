@@ -7,7 +7,10 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  user: User;
-  tokens: AuthTokens;
-  requiresEmailConfirmation?: boolean;
+  accessToken: string;
+  refreshToken: string;
+  refreshTokenExpiration: string;
+  userName: string;
+  email: string;
+  role: string;
 }

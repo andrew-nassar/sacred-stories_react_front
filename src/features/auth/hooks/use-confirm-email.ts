@@ -34,7 +34,7 @@ export function useConfirmEmail(): UseConfirmEmailResult {
 
       try {
         const response = await AuthApi.confirmEmail(userId, token);
-        if (response.success && response.data?.isConfirmed) {
+        if (response.succeeded && response.data?.isConfirmed) {
           setIsConfirmed(true);
           setConfirmData(response.data);
           setIsLoading(false);

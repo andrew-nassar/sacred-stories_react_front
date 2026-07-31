@@ -1,15 +1,29 @@
 import React from "react";
-import { Search, User, Sparkles, Compass, Sun, Moon } from "lucide-react";
+import { Search, User, Sparkles, Compass, Sun, Moon, LogOut } from "lucide-react";
 import { motion } from "motion/react";
 import { useSacredStore, TabId } from "../../shared/store/sacredStore";
 import { translations } from "../../shared/translations/translations";
+import { useLogout } from "@/src/features/auth/hooks/use-logout";
 
 interface NavbarProps {
   onOpenAuthModal: () => void;
 }
 
 export default function Navbar({ onOpenAuthModal }: NavbarProps) {
-  const { currentTab, setCurrentTab, setIsPrayerModalOpen, setSearchQueryPass, language, setLanguage, theme, setTheme } = useSacredStore();
+  const {
+    currentTab,
+    setCurrentTab,
+    setIsPrayerModalOpen,
+    setSearchQueryPass,
+    language,
+    setLanguage,
+    theme,
+    setTheme,
+    isAuthenticated,
+    currentUser,
+  } = useSacredStore();
+
+  const { logout, isLoggingOut } = useLogout();
   const t = translations[language];
 
   const navItems: { id: TabId; label: string }[] = [
@@ -102,14 +116,39 @@ export default function Navbar({ onOpenAuthModal }: NavbarProps) {
           <span className="hidden lg:inline uppercase">{t.bespokePrayer}</span>
         </button>
 
-        {/* Profile / Spiritual Companion */}
-        <button
-          onClick={onOpenAuthModal}
-          className="flex items-center gap-1 p-1.5 md:p-2 rounded-full text-white/70 hover:text-gold-accent hover:bg-white/5 transition-all duration-300 shrink-0"
-          title="Archival Journal"
-        >
-          <User className="w-4 h-4 md:w-5 md:h-5" />
-        </button>
+        {/* Auth / User Profile Section */}
+        {isAuthenticated ? (
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Username Display Badge */}
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] md:text-xs font-mono text-white/80"
+              title={currentUser?.email || currentUser?.userName}
+            >
+              <User className="w-3.5 h-3.5 text-gold-accent shrink-0" />
+              <span className="max-w-[80px] sm:max-w-[120px] truncate font-medium">
+                {currentUser?.userName || "Archivist"}
+              </span>
+            </div>
+
+            {/* Logout Icon Button */}
+            <button
+              onClick={logout}
+              disabled={isLoggingOut}
+              className="p-1.5 md:p-2 rounded-full text-white/70 hover:text-red-400 hover:bg-white/5 transition-all duration-300 shrink-0 disabled:opacity-50"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onOpenAuthModal}
+            className="flex items-center gap-1 p-1.5 md:p-2 rounded-full text-white/70 hover:text-gold-accent hover:bg-white/5 transition-all duration-300 shrink-0"
+            title="Archival Journal"
+          >
+            <User className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+        )}
       </div>
     </header>
   );

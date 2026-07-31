@@ -3,6 +3,15 @@ import { Saint } from "../../data";
 
 export type TabId = "home" | "saints" | "churches" | "timeline" | "about" | "saint-details";
 
+// User shape based on your Login response
+export interface CurrentUser {
+  userName: string;
+  email: string;
+  role: string;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 interface SacredState {
   currentTab: TabId;
   setCurrentTab: (tab: TabId) => void;
@@ -24,6 +33,11 @@ interface SacredState {
   setTheme: (theme: "dark" | "light") => void;
   isAmbientPlaying: boolean;
   setIsAmbientPlaying: (playing: boolean) => void;
+  // --- Auth state added ---
+  isAuthenticated: boolean;
+  setIsAuthenticated: (auth: boolean) => void;
+  currentUser: CurrentUser | null;
+  setCurrentUser: (user: CurrentUser | null) => void;
 }
 
 const SacredContext = createContext<SacredState | undefined>(undefined);
@@ -33,6 +47,12 @@ export function SacredStoreProvider({ children }: { children: ReactNode }) {
   const [previousTab, setPreviousTab] = useState<TabId>("home");
   const [selectedSaint, setSelectedSaint] = useState<Saint | null>(null);
   const [selectedSaintId, setSelectedSaintId] = useState<string | null>(null);
+
+  // Auth State Management
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return !!localStorage.getItem("accessToken") || !!localStorage.getItem("token");
+  });
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
   const setCurrentTab = (tab: TabId) => {
     setCurrentTabState((prev) => {
@@ -49,11 +69,11 @@ export function SacredStoreProvider({ children }: { children: ReactNode }) {
   const [isAmbientPlaying, setIsAmbientPlaying] = useState(false);
   const [language, setLanguageState] = useState<"en" | "ar">(() => {
     const saved = localStorage.getItem("sacred_language");
-    return (saved === "en" || saved === "ar") ? saved : "en";
+    return saved === "en" || saved === "ar" ? saved : "en";
   });
   const [theme, setThemeState] = useState<"dark" | "light">(() => {
     const saved = localStorage.getItem("sacred_theme");
-    return (saved === "dark" || saved === "light") ? saved : "dark";
+    return saved === "dark" || saved === "light" ? saved : "dark";
   });
 
   const setLanguage = (lang: "en" | "ar") => {
@@ -69,8 +89,7 @@ export function SacredStoreProvider({ children }: { children: ReactNode }) {
   // Sync HTML elements for dir and dark/light classes
   React.useEffect(() => {
     const root = document.documentElement;
-    
-    // Set text direction
+
     if (language === "ar") {
       root.setAttribute("dir", "rtl");
       root.setAttribute("lang", "ar");
@@ -82,8 +101,7 @@ export function SacredStoreProvider({ children }: { children: ReactNode }) {
 
   React.useEffect(() => {
     const root = document.documentElement;
-    
-    // Set theme classes
+
     if (theme === "light") {
       root.classList.remove("dark");
       root.classList.add("light");
@@ -116,6 +134,10 @@ export function SacredStoreProvider({ children }: { children: ReactNode }) {
         setTheme,
         isAmbientPlaying,
         setIsAmbientPlaying,
+        isAuthenticated,
+        setIsAuthenticated,
+        currentUser,
+        setCurrentUser,
       }}
     >
       {children}

@@ -29,11 +29,29 @@ export function useLogin(): UseLoginResult {
 
       try {
         const response = await AuthApi.login(data);
-        if (response.success && response.data) {
+
+        // 1. Check succeeded (from your API payload), success, statusCode, or token presence
+        const isSucceeded = !!(
+          response?.succeeded ||
+          response?.succeeded ||
+          response?.statusCode === 200 ||
+          response?.data?.accessToken
+        );
+
+        // 2. Extract inner data payload safely
+        const payload = response?.data || response;
+
+        if (isSucceeded && payload) {
           setIsLoading(false);
-          return response.data;
+          return payload as LoginResponse;
         } else {
-          setError(response.message || 'Login failed. Please check your credentials.');
+          // Prevent setting "Success" message as an error string
+          const errorMessage =
+            response?.message && response?.message !== 'Success'
+              ? response.message
+              : 'Login failed. Please check your credentials.';
+
+          setError(errorMessage);
           setIsLoading(false);
           return null;
         }

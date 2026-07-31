@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { useNavigate } from "react-router-dom";
 import React from 'react';
 import { 
   LayoutDashboard, 
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { PortalUser } from '../types';
 import { AuthService } from '../../../../services/auth.service';
+import { AuthApi } from '@/src/features/auth/api/auth.api';
 
 interface SidebarProps {
   currentView: string;
@@ -24,8 +25,9 @@ interface SidebarProps {
   currentUser: PortalUser;
   pendingCount: number;
 }
-
 export default function Sidebar({ currentView, onNavigate, currentUser, pendingCount }: SidebarProps) {
+  const navigate = useNavigate();
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'archive', label: 'Sacred Stories', icon: BookOpen },
@@ -121,7 +123,10 @@ export default function Sidebar({ currentView, onNavigate, currentUser, pendingC
           </div>
           <button
             id="btn-sidebar-logout"
-            onClick={() => AuthService.logout()}
+            onClick={() => {
+              AuthApi.logout();
+              navigate("/login");
+            }}
             title="Logout"
             className="text-stone-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer shrink-0 animate-in fade-in duration-200"
           >

@@ -34,7 +34,7 @@ export function useRegister(): UseRegisterResult {
 
       try {
         const response = await AuthApi.register(data);
-        if (response.success && response.data) {
+        if (response.succeeded && response.data) {
           setIsSuccess(true);
           setIsLoading(false);
           return response.data;
