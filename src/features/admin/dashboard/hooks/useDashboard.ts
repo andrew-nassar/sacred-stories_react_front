@@ -1,86 +1,108 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { useState, useEffect, useCallback } from 'react';
+import { DashboardMetrics, SacredStory, PortalUser } from '../types';
 import { DashboardService } from '../../services/dashboard.service';
-import { SacredStoriesService } from '../../services/sacredStories.service';
-import { SacredStory, PortalUser, DashboardMetrics } from '../types';
+import { fetchSacredStories } from '@/src/shared/sacred_stories/services/sacredStoryService';
 
 export function useDashboard() {
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [stories, setStories] = useState<SacredStory[]>([]);
   const [users, setUsers] = useState<PortalUser[]>([]);
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Pagination states for pending queue
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize] = useState<number>(5);
   const [totalPendingItems, setTotalPendingItems] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
 
-  // Pagination for Dashboard Pending Reviews list
-  const [currentPage, setCurrentPage] = useState<number>(() => {
-    if (typeof window === 'undefined') return 1;
-    const val = sessionStorage.getItem('dashboard_pendingPage');
-    return val ? Number(val) : 1;
-  });
-  const pageSize = 5; // Dashboard list is dense, shows 5 items per page
-
-  const loadDashboardData = useCallback(async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+
+      // 1. Fetch Backend Metrics
+      const backendMetrics = await DashboardService.getMetrics();
       
-      // Fetch metrics and stories in parallel
-      const [metricsData, storiesData] = await Promise.all([
-        DashboardService.getMetrics(),
-        SacredStoriesService.getPendingStories(currentPage, pageSize)
-      ]);
-      
-      setStories(storiesData.items);
-      setTotalPendingItems(storiesData.totalCount);
-      setTotalPages(Math.max(1, Math.ceil(storiesData.totalCount / pageSize)));
-      
-      // Map to DashboardMetrics expected format (with activity log mock)
-      setMetrics({
-        totalStoriesCount: metricsData.totalStoriesCount,
-        publishedCount: metricsData.publishedCount,
-        pendingCount: metricsData.pendingCount,
-        rejectedCount: metricsData.rejectedCount,
-        totalUsersCount: metricsData.totalUsersCount,
-        recentActivity: [
-          { id: 'act-1', text: 'New hagiographical chronicle submitted for review', time: '12 mins ago', type: 'submission' },
-          { id: 'act-2', text: 'St. Catherine chronicle published to public archive', time: '2 hours ago', type: 'system' },
-          { id: 'act-3', text: 'Archivist account of Thomas Aquinas activated', time: '5 hours ago', type: 'user' },
-          { id: 'act-4', text: 'Revised editorial checklist applied for liturgical records', time: '1 day ago', type: 'system' },
-        ]
+      // Map API metrics to DashboardMetrics interface
+      const mappedMetrics: DashboardMetrics = {
+        totalStoriesCount: backendMetrics.totalStoriesCount,
+        publishedCount: backendMetrics.publishedCount,
+        pendingCount: backendMetrics.pendingCount,
+        rejectedCount: backendMetrics.rejectedCount,
+        totalUsersCount: backendMetrics.totalUsersCount,
+        recentActivity:  []
+      };
+
+      setMetrics(mappedMetrics);
+
+      // 2. Fetch Pending Stories (Status = 0) with Pagination
+      const storiesResponse = await fetchSacredStories({
+        status: 0, // Pending Status
+        pageNumber: currentPage,
+        pageSize: pageSize,
       });
+      console.log("[useDashboard] Fetched stories response:", storiesResponse);
+      if (storiesResponse.succeeded && storiesResponse.data) {
+        const items = storiesResponse.data.items || [];
+        
+        // Map API stories to SacredStory UI type
+        // Map API stories to SacredStory UI type with fallback default values
+
+
+      // قاموس لترجمة الـ type ID إلى اسم الفئة
+      const SACRED_STORY_TYPES: Record<number, { name: string; displayName: string }> = {
+        0: { name: 'Hermit', displayName: 'متوحد' },
+        1: { name: 'Saint', displayName: 'قديس' },
+        2: { name: 'Martyr', displayName: 'شهيد' },
+        3: { name: 'Patriarch', displayName: 'بطريرك' },
+        4: { name: 'Archpriest', displayName: 'قمص' },
+        5: { name: 'Pope', displayName: 'بابا' },
+      };
+
+      // داخل الـ map في useDashboard.ts:
+      const mappedStories: SacredStory[] = items.map((item: any) => {
+        // تحديد اسم الفئة بناءً على الـ type المرجّع من الـ API
+        const categoryInfo = SACRED_STORY_TYPES[item.type as number];
+        const devotionalCategory = categoryInfo 
+          ? categoryInfo.displayName // أو categoryInfo.name إذا كنت تفضل الإنجليزية
+          : (item.categoryName || "عام");
+
+        return {
+          id: item.id?.toString() || "",
+          sacredName: item.name || item.title || item.sacredName || "بدون عنوان",
+          definingUtterance: item.famousQuote || item.definingUtterance || "",
+          devotionalCategory: devotionalCategory,
+          submittedBy: item.submittedBy || item.authorName || "مجهول",
+          status: item.status === 0 ? 'Pending' : item.status === 1 ? 'Published' : 'Rejected',
+          
+          // باقي الخصائص الأساسية لمنع أخطاء Typescript
+          canonizationYear: (item.canonizationYear || new Date().getFullYear()).toString(),
+          veneratedNarrative: item.veneratedNarrative || "",
+          dateSubmitted: item.dateSubmitted || new Date().toISOString(),
+          accessControl: item.accessControl || { publicArchive: true, liturgicalCalendarTag: "" },
+          burialPlace: item.burialPlace || { sanctuaryName: "", physicalAddress: "", latitude: "", longitude: "", siteTypology: "", translationDate: "", description: "" },
+          gallery: item.coverImage ? [{ id: "cover", imageUrl: item.coverImage, title: "Cover Image" }] : (item.gallery || [])
+        };
+      });
+
+        setStories(mappedStories);
+        setTotalPendingItems(storiesResponse.data.totalCount || backendMetrics.pendingCount);
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to sync sanctuary analytics');
+      console.error("[useDashboard] Error fetching data:", err);
+      setError(err.message || "Failed to sync sanctuary telemetry.");
     } finally {
       setLoading(false);
     }
   }, [currentPage, pageSize]);
 
   useEffect(() => {
-    loadDashboardData();
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
-    // Re-trigger sync when changes happen across features via custom events
-    const syncData = () => {
-      loadDashboardData();
-    };
-    window.addEventListener('refresh-stories', syncData);
-    window.addEventListener('refresh-users', syncData);
-    
-    return () => {
-      window.removeEventListener('refresh-stories', syncData);
-      window.removeEventListener('refresh-users', syncData);
-    };
-  }, [loadDashboardData]);
-
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-    sessionStorage.setItem('dashboard_pendingPage', String(page));
-  }, []);
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
   return {
     stories,
@@ -88,12 +110,11 @@ export function useDashboard() {
     metrics,
     loading,
     error,
-    refreshDashboard: loadDashboardData,
     currentPage,
     pageSize,
     totalPendingItems,
-    totalPages,
-    onPageChange: handlePageChange
+    totalPages: Math.ceil(totalPendingItems / pageSize) || 1,
+    onPageChange: handlePageChange,
+    refetch: fetchDashboardData,
   };
 }
-

@@ -27,6 +27,7 @@ export default function DashboardPage({
     totalPendingItems,
     totalPages,
     onPageChange,
+    refetch,
   } = useDashboard();
 
   if (loading) {
@@ -51,9 +52,15 @@ export default function DashboardPage({
         id="dashboard-error"
         className="flex-1 flex flex-col items-center justify-center p-8 bg-[#FAF9F5]/30"
       >
-        <div className="text-center space-y-4 max-w-md">
+        <div className="text-center space-y-4 max-w-md bg-white p-6 border border-red-100 rounded-xl shadow-sm">
           <p className="text-red-600 font-bold">✙ Telemetry Error</p>
           <p className="text-stone-500 text-xs leading-normal">{error}</p>
+          <button
+            onClick={refetch}
+            className="px-4 py-2 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition-colors cursor-pointer"
+          >
+            Retry Connection
+          </button>
         </div>
       </div>
     );
