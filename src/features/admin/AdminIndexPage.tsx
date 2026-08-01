@@ -140,9 +140,9 @@ export default function AdminIndexPage() {
           </div>
           <button
            onClick={() => {
-  AuthApi.logout();
-  navigate("/login");
-}}
+              AuthApi.logout();
+              navigate("/login");
+            }}
             className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 rounded-lg text-xs transition-colors cursor-pointer"
           >
             Go to Login

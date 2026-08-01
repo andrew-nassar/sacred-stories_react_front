@@ -4,9 +4,9 @@
  */
 
 import { api } from './auth.service';
-import { ADMIN_CONFIG } from '../features/admin/shared/config';
-import { SacredStory } from '../features/admin/pending-reviews/types';
-import { INITIAL_PENDING_STORIES } from '../features/admin/pending-reviews/mock/pendingStories.mock';
+import { ADMIN_CONFIG } from '../shared/config';
+import { SacredStory } from '../pending-reviews/types';
+import { INITIAL_PENDING_STORIES } from '../pending-reviews/mock/pendingStories.mock';
 
 export interface PaginatedStoriesResult {
   items: SacredStory[];

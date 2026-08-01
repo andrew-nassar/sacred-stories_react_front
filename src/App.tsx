@@ -5,7 +5,7 @@ import LiturgyPlayer from "./shared/components/LiturgyPlayer";
 import MobileAppLayout from "./shared/components/MobileAppLayout";
 import { BespokePrayerModal } from "./shared/components/Modals";
 import { AppProviders } from "./app/providers/AppProviders";
-import { useIsMobile } from "./features/admin/services/useIsMobile";
+import { useIsMobile } from "./shared/services/useIsMobile";
 import ArchivistChat from "./features/chat/ArchivistChat";
 import MainContent from "./features/navigation/MainContent";
 import { LoginPage, RegisterPage , ResendVerificationPage } from "./features/auth"; // استيراد صفحات الدخول والتسجيل المستقلة

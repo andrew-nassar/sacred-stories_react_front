@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios';
-import { ADMIN_CONFIG } from '../features/admin/shared/config';
+import { ADMIN_CONFIG } from '../shared/config';
 
 const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || '';
 

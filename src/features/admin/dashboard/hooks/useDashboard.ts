@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { DashboardService } from '../../../../services/dashboard.service';
-import { SacredStoriesService } from '../../../../services/sacredStories.service';
+import { DashboardService } from '../../services/dashboard.service';
+import { SacredStoriesService } from '../../services/sacredStories.service';
 import { SacredStory, PortalUser, DashboardMetrics } from '../types';
 
 export function useDashboard() {

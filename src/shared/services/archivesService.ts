@@ -1,5 +1,5 @@
 import { apiFetch } from "./httpService";
-import { Saint } from "../../../data";
+import { Saint } from "../../data";
 
 export interface SearchResponse {
   saint: Saint;

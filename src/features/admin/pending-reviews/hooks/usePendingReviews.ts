@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { SacredStory, EditorialChecks } from '../types';
 
-import { SacredStoriesService } from '../../../../services/sacredStories.service';
+import { SacredStoriesService } from '../../services/sacredStories.service';
 
 export function usePendingReviews() {
   // Persistence key helpers

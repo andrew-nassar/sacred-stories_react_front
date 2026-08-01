@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { PortalUser } from '../types';
-import { UsersService } from '@/src/services/users.service';
+import { UsersService } from '@/src/features/admin/services/users.service';
 
 export function useUsers() {
   const [users, setUsers] = useState<PortalUser[]>([]);

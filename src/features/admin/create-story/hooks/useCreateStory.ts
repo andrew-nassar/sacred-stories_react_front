@@ -5,7 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { SacredStory, TimelineEvent, GalleryAsset } from '../types';
-import { SacredStoriesService } from '../../../../services/sacredStories.service';
+import { SacredStoriesService } from '../../services/sacredStories.service';
 
 export function useCreateStory() {
   const [activeStep, setActiveStep] = useState<number>(1);

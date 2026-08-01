@@ -4,9 +4,9 @@
  */
 
 import { api } from './auth.service';
-import { ADMIN_CONFIG } from '../features/admin/shared/config';
-import { PortalUser } from '../features/admin/users/types';
-import { INITIAL_USERS } from '../features/admin/users/mock/users.mock';
+import { ADMIN_CONFIG } from '../shared/config';
+import { PortalUser } from '../users/types';
+import { INITIAL_USERS } from '../users/mock/users.mock';
 
 export interface PaginatedUsersResult {
   items: PortalUser[];

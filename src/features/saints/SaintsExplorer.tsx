@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useSacredStore } from "../../shared/store/sacredStore";
 import { fetchSacredStories } from "../../shared/sacred_stories/services/sacredStoryService";
 import { SacredStoryItem } from "../../shared/sacred_stories/models/sacred_Story_model";
-import { archivesAdapter } from "../admin/services/archivesService";
+import { archivesAdapter } from "../../shared/services/archivesService";
 
 // Local UI model for rendering cards
 export interface Saint {
