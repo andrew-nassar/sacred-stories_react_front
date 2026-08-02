@@ -5,6 +5,7 @@ import { useSacredStore } from "../../shared/store/sacredStore";
 import { fetchSacredStories } from "../../shared/sacred_stories/services/sacredStoryService";
 import { SacredStoryItem } from "../../shared/sacred_stories/models/sacred_Story_model";
 import { archivesAdapter } from "../../shared/services/archivesService";
+import { Pagination } from "../../shared/components/Pagination";
 
 // Local UI model for rendering cards
 export interface Saint {
@@ -62,6 +63,9 @@ export default function SaintsExplorer() {
   // Pure API-driven state (no static local data fallback)
   const [saints, setSaints] = useState<Saint[]>([]);
   const [isLoadingSaints, setIsLoadingSaints] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Gemini State
   const [isSynthesizing, setIsSynthesizing] = useState(false);
@@ -82,44 +86,68 @@ export default function SaintsExplorer() {
     };
   }, [setSearchQueryPass]);
 
-  // Fetch API function - Called ONLY on explicit user action or mount
-  const executeApiSearch = useCallback(async (query: string, typeVal: number | "all") => {
-    setIsLoadingSaints(true);
-    try {
-      const response = await fetchSacredStories({
-        searchTerm: query.trim() || undefined,
-        type: typeVal !== "all" ? typeVal : undefined,
-        pageSize: 12,
-      });
+  // Fetch API function - Called on explicit user action, page change, or mount
+  const executeApiSearch = useCallback(
+    async (query: string, typeVal: number | "all", page: number = 1, size: number = 12) => {
+      setIsLoadingSaints(true);
+      try {
+        const response = await fetchSacredStories({
+          searchTerm: query.trim() || undefined,
+          type: typeVal !== "all" ? typeVal : undefined,
+          pageNumber: page,
+          pageSize: size,
+        });
 
-      if (response && response.succeeded && response.data && response.data.items) {
-        const mapped = response.data.items.map(mapApiStoryToSaint);
-        setSaints(mapped);
-      } else {
+        if (response && response.succeeded && response.data && response.data.items) {
+          const mapped = response.data.items.map(mapApiStoryToSaint);
+          setSaints(mapped);
+          setTotalCount(response.data.totalCount ?? mapped.length);
+          setPageNumber(response.data.pageNumber ?? page);
+          setPageSize(response.data.pageSize ?? size);
+        } else {
+          setSaints([]);
+          setTotalCount(0);
+        }
+      } catch (err) {
+        console.error("API Error fetching stories:", err);
         setSaints([]);
+        setTotalCount(0);
+      } finally {
+        setIsLoadingSaints(false);
       }
-    } catch (err) {
-      console.error("API Error fetching stories:", err);
-      setSaints([]);
-    } finally {
-      setIsLoadingSaints(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   // Initial load on mount
   useEffect(() => {
-    executeApiSearch(searchInput, selectedType);
+    executeApiSearch(searchInput, selectedType, 1, pageSize);
   }, []);
 
-  // Trigger search on Click or Enter
+  // Trigger search on Click or Enter (resets to page 1)
   const handleExecuteSearch = () => {
-    executeApiSearch(searchInput, selectedType);
+    setPageNumber(1);
+    executeApiSearch(searchInput, selectedType, 1, pageSize);
   };
 
-  // Type Filter change trigger
+  // Type Filter change trigger (resets to page 1)
   const handleTypeChange = (typeId: number | "all") => {
     setSelectedType(typeId);
-    executeApiSearch(searchInput, typeId);
+    setPageNumber(1);
+    executeApiSearch(searchInput, typeId, 1, pageSize);
+  };
+
+  // Page change trigger
+  const handlePageChange = (newPage: number) => {
+    setPageNumber(newPage);
+    executeApiSearch(searchInput, selectedType, newPage, pageSize);
+  };
+
+  // Page size change trigger
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPageNumber(1);
+    executeApiSearch(searchInput, selectedType, 1, newSize);
   };
 
   // Select saint for details
@@ -668,6 +696,18 @@ export default function SaintsExplorer() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Pagination Controls */}
+      <Pagination
+        currentPage={pageNumber}
+        pageSize={pageSize}
+        totalItems={totalCount}
+        loading={isLoadingSaints}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        pageSizeOptions={[6, 12, 24, 48]}
+        className="mt-8"
+      />
     </div>
   );
 }

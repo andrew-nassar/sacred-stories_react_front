@@ -1,46 +1,48 @@
-import { apiFetch } from "../../services/httpService";
 import { SacredStoriesResponse, SacredStoryItem, SacredStoryType } from "../models/sacred_Story_model";
+
+// قراءة الـ API Base URL من بيئة العمل (Vite env) مع Fallback
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://localhost:7131";
 
 export interface FetchStoriesParams {
   searchTerm?: string;
   type?: number;
-  status?: number; // 0: Pending, 1: Published, 2: Rejected (اختياري)
   pageNumber?: number;
   pageSize?: number;
 }
 
 /**
- * جلب القصص مع دعم البحث، النوع، الحالة، والتصفح
- * لا يوجد status افتراضي لكي لا يؤثر على باقي أجزاء الموقع
+ * جلب القصص مع دعم البحث، النوع، والتصفح (بدون Status)
  */
-export async function fetchSacredStories(
-  params: FetchStoriesParams = {}
-): Promise<SacredStoriesResponse> {
+export async function fetchSacredStories(params: FetchStoriesParams = {}): Promise<SacredStoriesResponse> {
   try {
-    const { status, searchTerm, type, pageNumber, pageSize } = params;
-
     const query = new URLSearchParams();
 
-    if (searchTerm) {
-      query.append("SearchTerm", searchTerm);
+    if (params.searchTerm) {
+      query.append("SearchTerm", params.searchTerm);
     }
-    if (type !== undefined && type !== null) {
-      query.append("Type", type.toString());
+    if (params.type !== undefined && params.type !== null) {
+      query.append("Type", params.type.toString());
     }
-    // يتم إرسال Status فقط إذا تم تمريره صراحةً عند الاستدعاء
-    if (status !== undefined && status !== null) {
-      query.append("Status", status.toString());
+    if (params.pageNumber !== undefined) {
+      query.append("PageNumber", params.pageNumber.toString());
     }
-    if (pageNumber !== undefined) {
-      query.append("PageNumber", pageNumber.toString());
-    }
-    if (pageSize !== undefined) {
-      query.append("PageSize", pageSize.toString());
+    if (params.pageSize !== undefined) {
+      query.append("PageSize", params.pageSize.toString());
     }
 
     const queryString = query.toString() ? `?${query.toString()}` : "";
-    
-    return await apiFetch<SacredStoriesResponse>(`/api/SacredStories${queryString}`);
+    const response = await fetch(`${API_BASE_URL}/api/SacredStories${queryString}`, {
+      headers: {
+        Accept: "application/json",
+        'ngrok-skip-browser-warning': '69420'
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch stories: ${response.statusText}`);
+    }
+
+    return await response.json();
   } catch (error) {
     console.error("Error in fetchSacredStories:", error);
     throw error;
@@ -64,11 +66,21 @@ export async function fetchFeaturedStories(pageSize: number = 3): Promise<Sacred
 }
 
 /**
- * جلب أنواع القصص المتاحة
+ * جلب أنواع القصص المتاحة (من 0 إلى 5)
  */
 export async function fetchStoryTypes(): Promise<SacredStoryType[]> {
   try {
-    return await apiFetch<SacredStoryType[]>('/api/SacredStories/types');
+    const response = await fetch(`${API_BASE_URL}/api/SacredStories/types`, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch story types: ${response.statusText}`);
+    }
+
+    return await response.json();
   } catch (error) {
     console.error("Error in fetchStoryTypes:", error);
     return [];
