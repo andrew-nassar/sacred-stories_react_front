@@ -1,173 +1,139 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import { executeApiCall } from '../../shared/api/base';
+import { apiFetch } from '../../../../shared/services/httpService';
 import { SacredStory, EditorialChecks } from '../types';
-import { INITIAL_PENDING_STORIES } from '../mock/pendingStories.mock';
 import { PaginatedResponse } from '../../shared/types';
+import { fetchSacredStories } from '@/src/shared/sacred_stories/services/sacredStoryService';
+import { getSacredStoryById } from '@/src/features/saint-details/api/saintDetailsApi';
 
-const STORIES_LOCAL_STORAGE_KEY = 'sacred_stories_data';
+// Category mapping helper
+export const SACRED_STORY_TYPES: Record<number, string> = {
+  0: 'Hermit',
+  1: 'Saint',
+  2: 'Martyr',
+  3: 'Patriarch',
+  4: 'Archpriest',
+  5: 'Pope',
+};
 
-function getStoredStories(): SacredStory[] {
-  if (typeof window === 'undefined') return INITIAL_PENDING_STORIES;
-  const stored = localStorage.getItem(STORIES_LOCAL_STORAGE_KEY);
-  if (!stored) {
-    localStorage.setItem(STORIES_LOCAL_STORAGE_KEY, JSON.stringify(INITIAL_PENDING_STORIES));
-    return INITIAL_PENDING_STORIES;
-  }
-  try {
-    return JSON.parse(stored);
-  } catch (e) {
-    return INITIAL_PENDING_STORIES;
-  }
+export const SACRED_STORY_TYPES_REVERSE: Record<string, number> = {
+  'Hermit': 0,
+  'Saint': 1,
+  'Martyr': 2,
+  'Patriarch': 3,
+  'Archpriest': 4,
+  'Pope': 5,
+};
+
+export interface FetchPendingParams {
+  page: number;
+  limit: number;
+  search?: string;
+  category?: string;
 }
 
-function saveStoredStories(stories: SacredStory[]) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORIES_LOCAL_STORAGE_KEY, JSON.stringify(stories));
-  }
+/**
+ * Helper to map backend story object to internal SacredStory model
+ */
+export function mapStoryToUIModel(item: any): SacredStory {
+  return {
+    id: item.id?.toString() || '',
+    sacredName: item.name || item.sacredName || 'Untitled',
+    devotionalCategory: SACRED_STORY_TYPES[item.type] ?? item.devotionalCategory ?? 'General',
+    canonizationYear: (item.canonizationYear || new Date().getFullYear()).toString(),
+    definingUtterance: item.famousQuote || item.definingUtterance || '',
+    veneratedNarrative: item.veneratedNarrative || item.description || '',
+    accessControl: item.accessControl || { publicArchive: true, liturgicalCalendarTag: '' },
+    burialPlace: item.burialPlace || {
+      sanctuaryName: item.burialPlace?.sanctuaryName || '',
+      physicalAddress: item.burialPlace?.physicalAddress || '',
+      latitude: item.burialPlace?.latitude || '',
+      longitude: item.burialPlace?.longitude || '',
+      siteTypology: item.burialPlace?.siteTypology || '',
+      translationDate: item.burialPlace?.translationDate || '',
+      description: item.burialPlace?.description || '',
+    },
+    chronology: item.chronology || [],
+    gallery: item.coverImage
+      ? [{ id: 'cover', title: 'Cover Image', imageUrl: item.coverImage, category: 'Cover' }]
+      : item.gallery || [],
+    documentaryMedia: item.documentaryMedia || null,
+    status: item.status === 0 ? 'Pending' : item.status === 1 ? 'Published' : 'Rejected',
+    submittedBy: item.submittedBy || item.authorName || 'Anonymous',
+    dateSubmitted: item.dateSubmitted || new Date().toISOString().split('T')[0],
+    editorialComments: item.editorialComments || '',
+    editorialChecks: item.editorialChecks || {
+      authenticityVerified: false,
+      historicalCorroboration: false,
+      accessPermissionsChecked: false,
+      relicVenerationDocumented: false,
+    },
+  };
 }
 
 export const PendingReviewsApi = {
-  getPendingReviews: async (params: {
-    page: number;
-    limit: number;
-    search?: string;
-    category?: string;
-  }): Promise<PaginatedResponse<SacredStory>> => {
-    const stories = getStoredStories();
-    let pending = stories.filter(s => s.status === 'Pending');
-
-    // 1. Filter by search
-    if (params.search && params.search.trim() !== '') {
-      const q = params.search.toLowerCase();
-      pending = pending.filter(story => {
-        const matchesName = story.sacredName?.toLowerCase().includes(q);
-        const matchesCategory = story.devotionalCategory?.toLowerCase().includes(q);
-        const matchesUtterance = story.definingUtterance?.toLowerCase().includes(q);
-        const matchesNarrative = story.veneratedNarrative?.toLowerCase().includes(q);
-        const matchesSite = story.burialPlace?.sanctuaryName?.toLowerCase().includes(q);
-        return matchesName || matchesCategory || matchesUtterance || matchesNarrative || matchesSite;
-      });
-    }
-
-    // 2. Filter by category
+  /**
+   * Fetch pending stories list using status = 0
+   */
+  getPendingReviews: async (params: FetchPendingParams): Promise<PaginatedResponse<SacredStory>> => {
+    let categoryType: number | undefined = undefined;
     if (params.category && params.category !== 'ALL_CATEGORIES') {
-      pending = pending.filter(s => s.devotionalCategory === params.category);
+      if (!isNaN(Number(params.category))) {
+        categoryType = Number(params.category);
+      } else if (SACRED_STORY_TYPES_REVERSE[params.category] !== undefined) {
+        categoryType = SACRED_STORY_TYPES_REVERSE[params.category];
+      }
     }
 
-    // 3. Paginate
-    const totalItems = pending.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / params.limit));
-    const currentPage = Math.min(params.page, totalPages);
-    const startIdx = (currentPage - 1) * params.limit;
-    const paginatedData = pending.slice(startIdx, startIdx + params.limit);
+    const response = await fetchSacredStories({
+      status: 0, // Fetch status 0 (Pending)
+      pageNumber: params.page,
+      pageSize: params.limit,
+      searchTerm: params.search?.trim() || undefined,
+      type: categoryType,
+    });
 
-    const mockResult: PaginatedResponse<SacredStory> = {
-      data: paginatedData,
-      totalItems,
+    const items = response.data?.items || [];
+    const totalCount = response.data?.totalCount || 0;
+    const totalPages = Math.max(1, Math.ceil(totalCount / params.limit));
+
+    const mappedStories: SacredStory[] = items.map(mapStoryToUIModel);
+
+    return {
+      data: mappedStories,
+      totalItems: totalCount,
       totalPages,
-      currentPage,
-      pageSize: params.limit
+      currentPage: params.page,
+      pageSize: params.limit,
     };
-
-    return executeApiCall(
-      async () => {
-        const queryParams = new URLSearchParams({
-          page: String(params.page),
-          limit: String(params.limit),
-          search: params.search || '',
-          category: params.category || ''
-        });
-        const response = await fetch(`/api/pending-reviews?${queryParams.toString()}`);
-        if (!response.ok) throw new Error('API failed');
-        return response.json();
-      },
-      mockResult,
-      'getPendingReviews'
-    );
   },
 
-  approveStory: async (storyId: string, comments: string, checks: EditorialChecks): Promise<boolean> => {
-    const stories = getStoredStories();
-    const index = stories.findIndex(s => s.id === storyId);
-    if (index >= 0) {
-      stories[index] = {
-        ...stories[index],
-        status: 'Published',
+  /**
+   * Fetch full story details by ID using getSacredStoryById from saintDetailsApi.ts
+   */
+  getStoryById: async (id: string): Promise<SacredStory> => {
+    const rawDetails = await getSacredStoryById(id);
+    return mapStoryToUIModel(rawDetails);
+  },
+
+  /**
+   * Update story status (PUT /api/SacredStories/{id}/status)
+   * status = 1 (Accept/Publish)
+   * status = 2 (Reject)
+   * status = 0 (Revisions/Pending)
+   */
+  updateStoryStatus: async (
+    storyId: string, 
+    status: number, 
+    comments: string = '', 
+    checks?: EditorialChecks
+  ): Promise<boolean> => {
+    await apiFetch(`/api/SacredStories/${storyId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        status, // 1: Accept, 2: Reject, 0: Revision
         editorialComments: comments,
-        editorialChecks: checks
-      };
-      saveStoredStories(stories);
-    }
-
-    return executeApiCall(
-      async () => {
-        const response = await fetch(`/api/pending-reviews/${storyId}/approve`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ comments, checks }),
-        });
-        if (!response.ok) throw new Error('API failed');
-        return true;
-      },
-      true,
-      `approveStory(${storyId})`
-    );
+        editorialChecks: checks,
+      }),
+    });
+    return true;
   },
-
-  rejectStory: async (storyId: string, comments: string): Promise<boolean> => {
-    const stories = getStoredStories();
-    const index = stories.findIndex(s => s.id === storyId);
-    if (index >= 0) {
-      stories[index] = {
-        ...stories[index],
-        status: 'Rejected',
-        editorialComments: comments
-      };
-      saveStoredStories(stories);
-    }
-
-    return executeApiCall(
-      async () => {
-        const response = await fetch(`/api/pending-reviews/${storyId}/reject`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ comments }),
-        });
-        if (!response.ok) throw new Error('API failed');
-        return true;
-      },
-      true,
-      `rejectStory(${storyId})`
-    );
-  },
-
-  requestRevisions: async (storyId: string, comments: string): Promise<boolean> => {
-    const stories = getStoredStories();
-    const index = stories.findIndex(s => s.id === storyId);
-    if (index >= 0) {
-      stories[index] = {
-        ...stories[index],
-        editorialComments: comments
-      };
-      saveStoredStories(stories);
-    }
-
-    return executeApiCall(
-      async () => {
-        const response = await fetch(`/api/pending-reviews/${storyId}/revisions`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ comments }),
-        });
-        if (!response.ok) throw new Error('API failed');
-        return true;
-      },
-      true,
-      `requestRevisions(${storyId})`
-    );
-  }
 };

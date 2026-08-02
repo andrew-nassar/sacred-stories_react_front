@@ -56,7 +56,7 @@ export interface SacredStory {
     title: string;
     duration: string;
     url: string;
-  };
+  } | null;
   status: StoryStatus;
   submittedBy: string;
   dateSubmitted: string;

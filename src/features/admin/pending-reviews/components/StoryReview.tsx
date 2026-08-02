@@ -15,7 +15,8 @@ import {
   Calendar,
   Sparkles,
   Play,
-  Bookmark
+  Bookmark,
+  Loader2
 } from 'lucide-react';
 import { SacredStory, EditorialChecks } from '../types';
 
@@ -29,14 +30,14 @@ interface StoryReviewProps {
 
 export default function StoryReview({ story, onGoBack, onApprove, onReject, onRequestRevisions }: StoryReviewProps) {
   const [comments, setComments] = useState(story.editorialComments || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [checks, setChecks] = useState<EditorialChecks>({
-    authenticityVerified: story.editorialChecks.authenticityVerified || false,
-    historicalCorroboration: story.editorialChecks.historicalCorroboration || false,
-    accessPermissionsChecked: story.editorialChecks.accessPermissionsChecked || false,
-    relicVenerationDocumented: story.editorialChecks.relicVenerationDocumented || false,
+    authenticityVerified: story.editorialChecks?.authenticityVerified || false,
+    historicalCorroboration: story.editorialChecks?.historicalCorroboration || false,
+    accessPermissionsChecked: story.editorialChecks?.accessPermissionsChecked || false,
+    relicVenerationDocumented: story.editorialChecks?.relicVenerationDocumented || false,
   });
 
-  // Handle checking toggles
   const handleToggleCheck = (key: keyof EditorialChecks) => {
     setChecks(prev => ({
       ...prev,
@@ -46,14 +47,44 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
 
   const isAllChecked = Object.values(checks).every(Boolean);
 
+  const handleAcceptClick = async () => {
+    try {
+      setIsSubmitting(true);
+      await onApprove(story.id, comments, checks);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRejectClick = async () => {
+    if (window.confirm(`Are you sure you want to REJECT this story: ${story.sacredName}?`)) {
+      try {
+        setIsSubmitting(true);
+        await onReject(story.id, comments);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  const handleRevisionClick = async () => {
+    try {
+      setIsSubmitting(true);
+      await onRequestRevisions(story.id, comments);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div id="review-container" className="flex-1 overflow-y-auto p-8 bg-[#FAF9F5]/30 space-y-8 animate-in fade-in duration-200">
-      {/* Editorial Navigation and Back */}
+      {/* Editorial Navigation and Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-6">
         <div className="space-y-2">
           <button
             id="btn-back-to-queue"
             onClick={onGoBack}
+            disabled={isSubmitting}
             className="text-stone-500 hover:text-stone-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <ArrowLeft size={14} />
@@ -67,86 +98,87 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
           </div>
         </div>
 
-        {/* Top Editorial Action Buttons */}
+        {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* REJECT (status = 2) */}
           <button
             id="btn-reject"
-            onClick={() => {
-              if (window.confirm(`Are you sure you want to REJECT this story: ${story.sacredName}?`)) {
-                onReject(story.id, comments);
-              }
-            }}
-            className="bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 text-xs font-semibold py-2 px-4 rounded-lg border border-stone-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+            disabled={isSubmitting}
+            onClick={handleRejectClick}
+            className="bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 text-xs font-semibold py-2 px-4 rounded-lg border border-stone-300 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
           >
-            <XCircle size={15} className="text-stone-500" />
-            <span>Reject Entry</span>
+            {isSubmitting ? <Loader2 size={15} className="animate-spin" /> : <XCircle size={15} className="text-stone-500" />}
+            <span>Reject Entry (2)</span>
           </button>
 
+          {/* REQUEST REVISIONS (status = 0) */}
           <button
             id="btn-request-revisions"
-            onClick={() => {
-              onRequestRevisions(story.id, comments);
-              alert("Revisions requested. Story status remains in review, with comments saved.");
-            }}
-            className="bg-white hover:bg-stone-50 text-amber-700 hover:text-amber-800 text-xs font-semibold py-2 px-4 rounded-lg border border-amber-600/20 flex items-center gap-1.5 transition-colors cursor-pointer"
+            disabled={isSubmitting}
+            onClick={handleRevisionClick}
+            className="bg-white hover:bg-stone-50 text-amber-700 hover:text-amber-800 text-xs font-semibold py-2 px-4 rounded-lg border border-amber-600/20 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
           >
-            <AlertCircle size={15} className="text-amber-600" />
-            <span>Request Revisions</span>
+            {isSubmitting ? <Loader2 size={15} className="animate-spin" /> : <AlertCircle size={15} className="text-amber-600" />}
+            <span>Request Revisions (0)</span>
           </button>
 
+          {/* ACCEPT / APPROVE (status = 1) */}
           <button
             id="btn-approve"
-            disabled={!isAllChecked}
-            onClick={() => onApprove(story.id, comments, checks)}
+            disabled={!isAllChecked || isSubmitting}
+            onClick={handleAcceptClick}
             className={`text-xs font-bold py-2 px-5 rounded-lg flex items-center gap-1.5 shadow transition-all ${
-              isAllChecked
+              isAllChecked && !isSubmitting
                 ? 'bg-amber-600 hover:bg-amber-700 text-white cursor-pointer'
                 : 'bg-stone-200 text-stone-400 cursor-not-allowed shadow-none'
             }`}
           >
-            <CheckCircle size={15} />
-            <span>Approve & Publish Story</span>
+            {isSubmitting ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle size={15} />}
+            <span>Accept & Publish (1)</span>
           </button>
         </div>
       </div>
 
-      {/* Two Column Layout */}
+      {/* Two Column Layout Grid */}
       <div id="review-layout-grid" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column (Editorial Biography & Timeline & Gallery) */}
+        {/* Left Column */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Biography View */}
           <div className="bg-white border border-stone-200 p-8 rounded-xl shadow-sm space-y-4">
             <h3 className="font-serif text-lg font-bold text-stone-800 border-b border-stone-100 pb-3">Editorial Biography</h3>
             <p className="font-serif text-stone-700 text-lg leading-relaxed first-letter:text-5xl first-letter:font-bold first-letter:text-amber-700 first-letter:mr-3 first-letter:float-left">
-              {story.veneratedNarrative}
+              {story.veneratedNarrative || 'No narrative description available.'}
             </p>
-            <div className="pt-4 border-t border-stone-100 italic text-stone-500 text-sm flex gap-2 items-start bg-amber-50/20 p-4 rounded-lg mt-6">
-              <Bookmark size={16} className="text-amber-600 shrink-0 mt-0.5" />
-              <span>
-                "<strong>Defining Utterance:</strong> {story.definingUtterance}"
-              </span>
-            </div>
+            {story.definingUtterance && (
+              <div className="pt-4 border-t border-stone-100 italic text-stone-500 text-sm flex gap-2 items-start bg-amber-50/20 p-4 rounded-lg mt-6">
+                <Bookmark size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  "<strong>Defining Utterance:</strong> {story.definingUtterance}"
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Eternal Timeline */}
-          <div className="bg-white border border-stone-200 p-8 rounded-xl shadow-sm space-y-6">
-            <h3 className="font-serif text-lg font-bold text-stone-800 border-b border-stone-100 pb-3">Eternal Timeline</h3>
-            <div className="space-y-6 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-stone-200 pl-2">
-              {story.chronology.map((event) => (
-                <div key={event.id} className="relative pl-10 flex gap-4">
-                  <span className="absolute left-1.5 top-1.5 w-4 h-4 bg-amber-600 rounded-full border-4 border-white shadow-sm ring-1 ring-amber-600/50" />
-                  <div className="space-y-1">
-                    <span className="font-serif text-amber-700 text-sm font-bold block">{event.year}</span>
-                    <h4 className="font-bold text-stone-900 text-sm">{event.eventTitle}</h4>
-                    <p className="text-stone-600 text-xs leading-relaxed">{event.description}</p>
+          {/* Timeline */}
+          {story.chronology && story.chronology.length > 0 && (
+            <div className="bg-white border border-stone-200 p-8 rounded-xl shadow-sm space-y-6">
+              <h3 className="font-serif text-lg font-bold text-stone-800 border-b border-stone-100 pb-3">Eternal Timeline</h3>
+              <div className="space-y-6 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-stone-200 pl-2">
+                {story.chronology.map((event) => (
+                  <div key={event.id} className="relative pl-10 flex gap-4">
+                    <span className="absolute left-1.5 top-1.5 w-4 h-4 bg-amber-600 rounded-full border-4 border-white shadow-sm ring-1 ring-amber-600/50" />
+                    <div className="space-y-1">
+                      <span className="font-serif text-amber-700 text-sm font-bold block">{event.year}</span>
+                      <h4 className="font-bold text-stone-900 text-sm">{event.eventTitle}</h4>
+                      <p className="text-stone-600 text-xs leading-relaxed">{event.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Sacred Gallery */}
-          {story.gallery.length > 0 && (
+          {/* Gallery */}
+          {story.gallery && story.gallery.length > 0 && (
             <div className="bg-white border border-stone-200 p-8 rounded-xl shadow-sm space-y-4">
               <h3 className="font-serif text-lg font-bold text-stone-800 border-b border-stone-100 pb-3">Sacred Relic & Art Gallery</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -167,30 +199,9 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
               </div>
             </div>
           )}
-
-          {/* Documentary Media */}
-          {story.documentaryMedia && (
-            <div className="bg-white border border-stone-200 p-8 rounded-xl shadow-sm space-y-4">
-              <h3 className="font-serif text-lg font-bold text-stone-800 border-b border-stone-100 pb-3">Documentary Media Connected</h3>
-              <div className="bg-stone-900 text-stone-100 p-6 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 border border-amber-600/20">
-                <div className="space-y-1">
-                  <p className="font-serif text-amber-400 font-bold text-base">{story.documentaryMedia.title}</p>
-                  <p className="text-xs text-stone-400">Cinematic Short Document • Duration: {story.documentaryMedia.duration}</p>
-                </div>
-                <button
-                  id="btn-play-preview-documentary"
-                  onClick={() => alert(`Launching mock video streaming player for: ${story.documentaryMedia.title}`)}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 px-4 rounded flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
-                >
-                  <Play size={14} fill="white" />
-                  <span>Play Film Preview</span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Right Column (Verification Integrity & Metadata & Burial Card) */}
+        {/* Right Column */}
         <div className="space-y-8">
           {/* Verification Checklist */}
           <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm space-y-4 relative overflow-hidden">
@@ -199,14 +210,10 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
               <Sparkles size={18} className="text-amber-600" />
               <span>Verification Integrity</span>
             </h3>
-            <p className="text-stone-500 text-xs leading-normal">
-              You must verify the following hagiographical conditions are fully documented before approving.
-            </p>
 
             <div className="space-y-3 pt-2">
               <label className="flex items-start gap-3 p-3 rounded-lg border border-stone-100 bg-stone-50/50 hover:bg-stone-50 cursor-pointer select-none">
                 <input 
-                  id="chk-authenticity"
                   type="checkbox"
                   checked={checks.authenticityVerified}
                   onChange={() => handleToggleCheck('authenticityVerified')}
@@ -214,13 +221,11 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
                 />
                 <div className="space-y-0.5">
                   <p className="text-xs font-bold text-stone-800">Authenticity of Relics Verified</p>
-                  <p className="text-[10px] text-stone-400">Relics validated by archdiocesan seal</p>
                 </div>
               </label>
 
               <label className="flex items-start gap-3 p-3 rounded-lg border border-stone-100 bg-stone-50/50 hover:bg-stone-50 cursor-pointer select-none">
                 <input 
-                  id="chk-historical"
                   type="checkbox"
                   checked={checks.historicalCorroboration}
                   onChange={() => handleToggleCheck('historicalCorroboration')}
@@ -228,13 +233,11 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
                 />
                 <div className="space-y-0.5">
                   <p className="text-xs font-bold text-stone-800">Historical Corroboration</p>
-                  <p className="text-[10px] text-stone-400">Cross-referenced with imperial records</p>
                 </div>
               </label>
 
               <label className="flex items-start gap-3 p-3 rounded-lg border border-stone-100 bg-stone-50/50 hover:bg-stone-50 cursor-pointer select-none">
                 <input 
-                  id="chk-permissions"
                   type="checkbox"
                   checked={checks.accessPermissionsChecked}
                   onChange={() => handleToggleCheck('accessPermissionsChecked')}
@@ -242,13 +245,11 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
                 />
                 <div className="space-y-0.5">
                   <p className="text-xs font-bold text-stone-800">Access Permissions Checked</p>
-                  <p className="text-[10px] text-stone-400">Permissions for publishing private logs</p>
                 </div>
               </label>
 
               <label className="flex items-start gap-3 p-3 rounded-lg border border-stone-100 bg-stone-50/50 hover:bg-stone-50 cursor-pointer select-none">
                 <input 
-                  id="chk-veneration"
                   type="checkbox"
                   checked={checks.relicVenerationDocumented}
                   onChange={() => handleToggleCheck('relicVenerationDocumented')}
@@ -256,51 +257,12 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
                 />
                 <div className="space-y-0.5">
                   <p className="text-xs font-bold text-stone-800">Relic Veneration Documented</p>
-                  <p className="text-[10px] text-stone-400">Miracles list attached to sanctuary logs</p>
                 </div>
               </label>
             </div>
           </div>
 
-          {/* Burial Place Details Map Card */}
-          <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm space-y-4">
-            <h3 className="font-serif text-lg font-bold text-stone-800 flex items-center gap-1.5">
-              <MapPin size={18} className="text-amber-600" />
-              <span>Burial Place Context</span>
-            </h3>
-
-            {/* Custom high fidelity map preview */}
-            <div className="h-44 bg-[#E0D8C3] rounded-lg relative overflow-hidden flex items-center justify-center border border-stone-200">
-              <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#C5BA9E_1.5px,transparent_1.5px)] [background-size:16px_16px]" />
-              <div className="absolute top-1/3 left-0 right-0 h-1 bg-[#D1C8AD]" />
-              <div className="absolute top-2/3 left-0 right-0 h-1 bg-[#D1C8AD]" />
-              <div className="absolute left-1/3 top-0 bottom-0 w-1 bg-[#D1C8AD]" />
-              <div className="absolute left-2/3 top-0 bottom-0 w-1 bg-[#D1C8AD]" />
-
-              {/* Pin */}
-              <div className="relative flex flex-col items-center">
-                <span className="w-3 h-3 bg-red-600 rounded-full animate-ping absolute top-0" />
-                <MapPin size={32} className="text-red-600 drop-shadow-md relative" fill="red" />
-              </div>
-
-              {/* Tooltip */}
-              <div className="absolute bottom-2 bg-white/95 px-3 py-1.5 rounded border border-amber-600/10 shadow-md text-center max-w-[90%]">
-                <p className="text-[10px] font-bold text-stone-800 truncate">{story.burialPlace.sanctuaryName}</p>
-                <p className="text-[8px] text-stone-400 font-semibold uppercase tracking-wider">{story.burialPlace.siteTypology}</p>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-xs text-stone-600">
-              <p><strong>Sanctuary:</strong> {story.burialPlace.sanctuaryName}</p>
-              <p><strong>Address:</strong> {story.burialPlace.physicalAddress}</p>
-              <p><strong>Coordinates:</strong> {story.burialPlace.latitude}° N, {story.burialPlace.longitude}° E</p>
-              <p className="pt-2 border-t border-stone-100 text-[11px] text-stone-500 italic">
-                {story.burialPlace.description}
-              </p>
-            </div>
-          </div>
-
-          {/* Entry Metadata */}
+          {/* Submission Metadata */}
           <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm space-y-4">
             <h3 className="font-serif text-sm font-bold text-stone-800 border-b border-stone-100 pb-2">Submission Metadata</h3>
             <div className="space-y-3">
@@ -326,17 +288,10 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
                   {story.devotionalCategory}
                 </span>
               </div>
-
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-stone-400 font-semibold uppercase">Canonization Year</span>
-                <span className="text-stone-800 font-bold">
-                  {story.canonizationYear}
-                </span>
-              </div>
             </div>
           </div>
 
-          {/* Editorial Comments / Feedback Box */}
+          {/* Editorial Comments Textarea */}
           <div className="bg-white border border-stone-200 rounded-xl p-6 shadow-sm space-y-3">
             <h3 className="font-serif text-sm font-bold text-stone-800 flex items-center gap-1">
               <Clock size={16} className="text-amber-600" />
@@ -347,12 +302,9 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
               rows={4}
               value={comments}
               onChange={(e) => setComments(e.target.value)}
-              placeholder="Provide constructive feedback, requested revisions, or notes about the relics' authenticity..."
+              placeholder="Provide constructive feedback or revision notes..."
               className="w-full bg-stone-50 border border-stone-200 rounded-lg p-3 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
-            <p className="text-[10px] text-stone-400 font-medium">
-              Comments are saved when requesting revisions, rejecting, or approving.
-            </p>
           </div>
         </div>
       </div>

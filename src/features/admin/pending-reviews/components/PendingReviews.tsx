@@ -130,11 +130,10 @@ export default function PendingReviews({
               </thead>
               <tbody className="divide-y divide-stone-100 text-sm text-stone-600">
                 {stories.map((story) => {
-                  // Compute completed checks
                   const checks = story.editorialChecks;
                   const totalChecks = Object.values(checks).length;
                   const completedChecks = Object.values(checks).filter(Boolean).length;
-                  const isChecklistPerfect = completedChecks === totalChecks;
+                  const isChecklistPerfect = completedChecks === totalChecks && totalChecks > 0;
 
                   return (
                     <tr id={`pending-row-${story.id}`} key={story.id} className="hover:bg-stone-50/30 transition-colors">
@@ -166,7 +165,7 @@ export default function PendingReviews({
                           <div className="w-24 bg-stone-100 rounded-full h-1.5 overflow-hidden">
                             <div 
                               className={`h-full rounded-full ${isChecklistPerfect ? 'bg-emerald-600' : 'bg-amber-500'}`}
-                              style={{ width: `${(completedChecks / totalChecks) * 100}%` }}
+                              style={{ width: `${totalChecks ? (completedChecks / totalChecks) * 100 : 0}%` }}
                             />
                           </div>
                           <span className={`text-xs font-bold ${isChecklistPerfect ? 'text-emerald-700' : 'text-amber-700'}`}>
@@ -192,7 +191,7 @@ export default function PendingReviews({
           </div>
         )}
 
-        {/* Reusable Pagination Controls inside Table Footer */}
+        {/* Reusable Pagination Controls */}
         {stories.length > 0 && (
           <div className="p-4 border-t border-stone-100 bg-stone-50/50">
             <Pagination

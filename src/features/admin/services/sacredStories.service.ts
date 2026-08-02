@@ -6,7 +6,6 @@
 import { api } from './auth.service';
 import { ADMIN_CONFIG } from '../shared/config';
 import { SacredStory } from '../pending-reviews/types';
-import { INITIAL_PENDING_STORIES } from '../pending-reviews/mock/pendingStories.mock';
 
 export interface PaginatedStoriesResult {
   items: SacredStory[];
@@ -22,37 +21,6 @@ export const SacredStoriesService = {
     search?: string,
     category?: string
   ): Promise<PaginatedStoriesResult> => {
-    if (ADMIN_CONFIG.useMockOnly) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      let pending = INITIAL_PENDING_STORIES;
-
-      if (search && search.trim() !== '') {
-        const q = search.toLowerCase();
-        pending = pending.filter(story => {
-          return (
-            story.sacredName?.toLowerCase().includes(q) ||
-            story.devotionalCategory?.toLowerCase().includes(q) ||
-            story.definingUtterance?.toLowerCase().includes(q) ||
-            story.veneratedNarrative?.toLowerCase().includes(q)
-          );
-        });
-      }
-
-      if (category && category !== 'ALL_CATEGORIES') {
-        pending = pending.filter(s => s.devotionalCategory === category);
-      }
-
-      const totalCount = pending.length;
-      const startIdx = (pageNumber - 1) * pageSize;
-      const paginatedItems = pending.slice(startIdx, startIdx + pageSize);
-      return {
-        items: paginatedItems,
-        totalCount,
-        pageNumber,
-        pageSize,
-      };
-    }
-
     try {
       // VerificationStatus: Pending = 0
       const response = await api.get('/api/SacredStories', {
@@ -124,18 +92,6 @@ export const SacredStoriesService = {
       };
     } catch (error) {
       console.error('[SacredStoriesService] Error fetching pending stories:', error);
-      if (ADMIN_CONFIG.autoFallbackToMock) {
-        console.warn('[SacredStoriesService] Falling back to mock pending stories');
-        const totalCount = INITIAL_PENDING_STORIES.length;
-        const startIdx = (pageNumber - 1) * pageSize;
-        const paginatedItems = INITIAL_PENDING_STORIES.slice(startIdx, startIdx + pageSize);
-        return {
-          items: paginatedItems,
-          totalCount,
-          pageNumber,
-          pageSize,
-        };
-      }
       throw error;
     }
   },

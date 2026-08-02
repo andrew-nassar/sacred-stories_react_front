@@ -1,3 +1,4 @@
+import { api } from './../../services/auth.service';
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -5,11 +6,9 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { SacredStory, EditorialChecks } from '../types';
-
-import { SacredStoriesService } from '../../services/sacredStories.service';
+import { PendingReviewsApi, SACRED_STORY_TYPES } from '../api/pendingReviews.api';
 
 export function usePendingReviews() {
-  // Persistence key helpers
   const getSessionValue = <T>(key: string, defaultValue: T): T => {
     if (typeof window === 'undefined') return defaultValue;
     const item = sessionStorage.getItem(`pending_reviews_${key}`);
@@ -30,7 +29,11 @@ export function usePendingReviews() {
   const [pendingStories, setPendingStories] = useState<SacredStory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // ID and Detailed Data State
   const [activeReviewId, setActiveReviewId] = useState<string | null>(null);
+  const [activeStoryDetails, setActiveStoryDetails] = useState<SacredStory | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
 
   // Pagination and Filter States
   const [currentPage, setCurrentPageState] = useState<number>(() => getSessionValue('currentPage', 1));
@@ -48,40 +51,39 @@ export function usePendingReviews() {
   const setPageSize = useCallback((s: number) => {
     setPageSizeState(s);
     setSessionValue('pageSize', s);
-    setCurrentPage(1); // Reset to page 1 on page size change
+    setCurrentPage(1);
   }, [setCurrentPage]);
 
   const setSearchQuery = useCallback((q: string) => {
     setSearchQueryState(q);
     setSessionValue('searchQuery', q);
-    setCurrentPage(1); // Reset to page 1 on search change
+    setCurrentPage(1);
   }, [setCurrentPage]);
 
   const setSelectedCategory = useCallback((c: string) => {
     setSelectedCategoryState(c);
     setSessionValue('selectedCategory', c);
-    setCurrentPage(1); // Reset to page 1 on category change
+    setCurrentPage(1);
   }, [setCurrentPage]);
 
-  // Load reviews from paginated API
+  // Fetch pending list
   const loadPending = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await SacredStoriesService.getPendingStories(
-        currentPage,
-        pageSize,
-        searchQuery,
-        selectedCategory
-      );
-      setPendingStories(res.items);
-      setTotalItems(res.totalCount);
-      const computedPages = Math.max(1, Math.ceil(res.totalCount / pageSize));
-      setTotalPages(computedPages);
-      
-      // Make sure current page stays valid
-      if (res.pageNumber !== currentPage && res.pageNumber > 0) {
-        setCurrentPageState(res.pageNumber);
+      const res = await PendingReviewsApi.getPendingReviews({
+        page: currentPage,
+        limit: pageSize,
+        search: searchQuery,
+        category: selectedCategory,
+      });
+
+      setPendingStories(res.data);
+      setTotalItems(res.totalItems);
+      setTotalPages(res.totalPages);
+
+      if (res.currentPage !== currentPage && res.currentPage > 0) {
+        setCurrentPageState(res.currentPage);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to fetch pending review queue');
@@ -90,14 +92,33 @@ export function usePendingReviews() {
     }
   }, [currentPage, pageSize, searchQuery, selectedCategory]);
 
+  // Fetch story details by ID when activeReviewId changes
+  useEffect(() => {
+    if (!activeReviewId) {
+      setActiveStoryDetails(null);
+      return;
+    }
+
+    async function fetchStoryDetails() {
+      try {
+        setLoadingDetails(true);
+        const storyData = await PendingReviewsApi.getStoryById(activeReviewId!);
+        setActiveStoryDetails(storyData);
+      } catch (err: any) {
+        alert('Failed to load story details: ' + err.message);
+        setActiveReviewId(null);
+      } finally {
+        setLoadingDetails(false);
+      }
+    }
+
+    fetchStoryDetails();
+  }, [activeReviewId]);
 
   useEffect(() => {
     loadPending();
 
-    const handleRefresh = () => {
-      loadPending();
-    };
-
+    const handleRefresh = () => loadPending();
     const handleOpenReview = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (customEvent.detail && customEvent.detail.storyId) {
@@ -113,43 +134,41 @@ export function usePendingReviews() {
     };
   }, [loadPending]);
 
-  // Static standard devotional categories inside queue
-  const categories = useMemo(() => {
-    return ['Reliquaries', 'Sacred Text', 'Liturgical', 'Venerable Icon', 'Chronicle'];
-  }, []);
+  const categories = useMemo(() => Object.values(SACRED_STORY_TYPES), []);
 
-  const activeReviewStory = useMemo(() => {
-    if (!activeReviewId) return null;
-    return pendingStories.find(s => s.id === activeReviewId) || null;
-  }, [pendingStories, activeReviewId]);
-
+  // Accept / Approve Story (status = 1)
   const handleApprove = useCallback(async (storyId: string, comments: string, checks: EditorialChecks) => {
     try {
-      await SacredStoriesService.changeStoryStatus(storyId, 1);
+      await PendingReviewsApi.updateStoryStatus(storyId, 1, comments, checks);
       await loadPending();
       setActiveReviewId(null);
+      setActiveStoryDetails(null);
       window.dispatchEvent(new Event('refresh-stories'));
     } catch (err: any) {
       alert('Failed to approve story: ' + err.message);
     }
   }, [loadPending]);
 
+  // Reject Story (status = 2)
   const handleReject = useCallback(async (storyId: string, comments: string) => {
     try {
-      await SacredStoriesService.changeStoryStatus(storyId, 2);
+      await PendingReviewsApi.updateStoryStatus(storyId, 2, comments);
       await loadPending();
       setActiveReviewId(null);
+      setActiveStoryDetails(null);
       window.dispatchEvent(new Event('refresh-stories'));
     } catch (err: any) {
       alert('Failed to reject story: ' + err.message);
     }
   }, [loadPending]);
 
+  // Request Revisions (status = 0)
   const handleRequestRevisions = useCallback(async (storyId: string, comments: string) => {
     try {
-      await SacredStoriesService.changeStoryStatus(storyId, 0);
+      await PendingReviewsApi.updateStoryStatus(storyId, 0, comments);
       await loadPending();
       setActiveReviewId(null);
+      setActiveStoryDetails(null);
       window.dispatchEvent(new Event('refresh-stories'));
     } catch (err: any) {
       alert('Failed to request revisions: ' + err.message);
@@ -162,13 +181,13 @@ export function usePendingReviews() {
     error,
     activeReviewId,
     setActiveReviewId,
-    activeReviewStory,
+    activeStoryDetails,
+    loadingDetails,
     handleApprove,
     handleReject,
     handleRequestRevisions,
     refreshQueue: loadPending,
 
-    // Sorting/Pagination and Filtering State
     currentPage,
     pageSize,
     totalItems,
@@ -179,6 +198,6 @@ export function usePendingReviews() {
     setSelectedCategory,
     categories,
     onPageChange: setCurrentPage,
-    onPageSizeChange: setPageSize
+    onPageSizeChange: setPageSize,
   };
 }
