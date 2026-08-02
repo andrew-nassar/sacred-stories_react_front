@@ -1,17 +1,17 @@
 import { SacredStoriesResponse, SacredStoryItem, SacredStoryType } from "../models/sacred_Story_model";
-
-// قراءة الـ API Base URL من بيئة العمل (Vite env) مع Fallback
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://localhost:7131";
+import { apiFetch } from "@/src/shared/services/httpService"; // Adjust relative path if needed
 
 export interface FetchStoriesParams {
   searchTerm?: string;
   type?: number;
+  status?: number;
   pageNumber?: number;
   pageSize?: number;
 }
 
 /**
- * جلب القصص مع دعم البحث، النوع، والتصفح (بدون Status)
+ * Fetch stories with support for search, type, status (including pending = 0), and pagination.
+ * Automatically attaches Authorization Bearer token via apiFetch.
  */
 export async function fetchSacredStories(params: FetchStoriesParams = {}): Promise<SacredStoriesResponse> {
   try {
@@ -23,6 +23,9 @@ export async function fetchSacredStories(params: FetchStoriesParams = {}): Promi
     if (params.type !== undefined && params.type !== null) {
       query.append("Type", params.type.toString());
     }
+    if (params.status !== undefined && params.status !== null) {
+      query.append("Status", params.status.toString());
+    }
     if (params.pageNumber !== undefined) {
       query.append("PageNumber", params.pageNumber.toString());
     }
@@ -31,18 +34,12 @@ export async function fetchSacredStories(params: FetchStoriesParams = {}): Promi
     }
 
     const queryString = query.toString() ? `?${query.toString()}` : "";
-    const response = await fetch(`${API_BASE_URL}/api/SacredStories${queryString}`, {
+
+    return await apiFetch<SacredStoriesResponse>(`/api/SacredStories${queryString}`, {
       headers: {
-        Accept: "application/json",
-        'ngrok-skip-browser-warning': '69420'
+        'ngrok-skip-browser-warning': '69420',
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch stories: ${response.statusText}`);
-    }
-
-    return await response.json();
   } catch (error) {
     console.error("Error in fetchSacredStories:", error);
     throw error;
@@ -50,7 +47,7 @@ export async function fetchSacredStories(params: FetchStoriesParams = {}): Promi
 }
 
 /**
- * جلب أبرز القصص (Featured Stories)
+ * Fetch featured stories
  */
 export async function fetchFeaturedStories(pageSize: number = 3): Promise<SacredStoryItem[]> {
   try {
@@ -66,21 +63,15 @@ export async function fetchFeaturedStories(pageSize: number = 3): Promise<Sacred
 }
 
 /**
- * جلب أنواع القصص المتاحة (من 0 إلى 5)
+ * Fetch available story types
  */
 export async function fetchStoryTypes(): Promise<SacredStoryType[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/SacredStories/types`, {
+    return await apiFetch<SacredStoryType[]>('/api/SacredStories/types', {
       headers: {
-        Accept: "application/json",
+        'ngrok-skip-browser-warning': '69420',
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch story types: ${response.statusText}`);
-    }
-
-    return await response.json();
   } catch (error) {
     console.error("Error in fetchStoryTypes:", error);
     return [];
