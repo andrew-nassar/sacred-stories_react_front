@@ -197,6 +197,23 @@ export function SacredTimeline({
 }: SacredTimelineProps) {
   const isAr = language === "ar";
   
+  const sortedItems = React.useMemo(() => {
+    const parseYear = (yearStr: string) => {
+      if (!yearStr) return 0;
+      const isBC = yearStr.toLowerCase().includes('bc') || yearStr.includes('قبل الميلاد') || yearStr.includes('ق.م');
+      const arabicDigitsMap: Record<string, string> = {
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+      };
+      const normalized = yearStr.replace(/[٠-٩]/g, (char) => arabicDigitsMap[char] || char);
+      const match = normalized.match(/\d+/);
+      const numericVal = match ? parseInt(match[0], 10) : 0;
+      return isBC ? -numericVal : numericVal;
+    };
+
+    return [...timelineItems].sort((a, b) => parseYear(a.year) - parseYear(b.year));
+  }, [timelineItems]);
+  
   return (
     <section id="lex-timeline-section" className={`space-y-12 ${isAr ? "[direction:rtl]" : "[direction:ltr]"}`}>
       {/* Centered Header */}
@@ -216,7 +233,7 @@ export function SacredTimeline({
         <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-[1.5px] bg-gradient-to-b from-[#D4AF37] via-[#D4AF37]/40 to-transparent -translate-x-1/2" />
 
         <div className="space-y-16 relative z-10">
-          {timelineItems.map((event, index) => {
+          {sortedItems.map((event, index) => {
             // Alternate side alignments on desktop
             const isEven = index % 2 === 0;
             return (

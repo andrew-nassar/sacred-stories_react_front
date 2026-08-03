@@ -73,6 +73,7 @@ export interface PortalUser {
   avatarUrl: string;
   verified: boolean;
   joinDate: string;
+  permissions?: string[];
 }
 
 export interface PaginatedResponse<T> {

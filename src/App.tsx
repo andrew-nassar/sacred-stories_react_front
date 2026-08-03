@@ -10,10 +10,24 @@ import ArchivistChat from "./features/chat/ArchivistChat";
 import MainContent from "./features/navigation/MainContent";
 import { LoginPage, RegisterPage , ResendVerificationPage } from "./features/auth"; // استيراد صفحات الدخول والتسجيل المستقلة
 import AdminIndexPage from "./features/admin/AdminIndexPage";
+import CreateStoryPage from "./features/create-story/pages/CreateStoryPage";
+import { PublicRoute, AuthenticatedRoute } from "./shared/auth/authGuard";
+import { useSacredStore } from "./app/store/sacredStore";
+import { AdminRoute } from "./shared/auth/adminGuard";
 
 function SanctuaryApp() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { isAuthenticated, currentUser } = useSacredStore();
+
+  React.useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      const role = (currentUser.role || "").toLowerCase();
+      if (["admin", "archivist", "chief editor"].includes(role)) {
+        navigate("/admin/dashboard", { replace: true });
+      }
+    }
+  }, [isAuthenticated, currentUser, navigate]);
 
   // دالة تحويل المستخدم إلى صفحة تسجيل الدخول المستقلة
   const handleOpenAuth = () => {
@@ -59,10 +73,13 @@ export default function App() {
           <Route path="/*" element={<SanctuaryApp />} />
 
           {/* صفحة تسجيل الدخول كمكون/صفحة مستقلة بالكامل */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<AdminIndexPage />} />
+          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+          <Route path="/create-story" element={<AuthenticatedRoute><CreateStoryPage /></AuthenticatedRoute>} />
+          <Route path="/dashboard" element={<AdminRoute><AdminIndexPage /></AdminRoute>} />
+          <Route path="/admin" element={<AdminRoute><AdminIndexPage /></AdminRoute>} />
+          <Route path="/admin/*" element={<AdminRoute><AdminIndexPage /></AdminRoute>} />
           {/* صفحة إنشاء حساب مستقلة بالكامل */}
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
           {/* صفحة إعادة إرسال البريد الإلكتروني للتحقق */}
           <Route path="/resend-verification" element={<ResendVerificationPage />} />
         </Routes>

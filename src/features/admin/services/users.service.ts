@@ -52,42 +52,102 @@ export const UsersService = {
     }
 
     try {
+      let roleParam: number | string | undefined = undefined;
+      if (typeof role === 'number') {
+        roleParam = role;
+      } else if (typeof role === 'string' && role !== 'ALL' && role.trim() !== '') {
+        roleParam = /^\d+$/.test(role.trim()) ? parseInt(role.trim(), 10) : role.trim();
+      }
+
       const response = await api.get('/api/Auth/users', {
         params: {
-          searchTerm: searchTerm || undefined,
-          role: role === 'ALL' ? undefined : role,
+          searchTerm: searchTerm && searchTerm.trim() !== '' ? searchTerm.trim() : undefined,
+          role: roleParam,
           pageNumber,
           pageSize,
         },
       });
 
       const responseData = response.data;
-      const data = responseData?.data || responseData;
+      const dataContainer = responseData?.data || responseData;
 
-      const items = (data?.items || data?.Items || responseData?.items || responseData?.Items || []) as any[];
-      const totalCount = Number(data?.totalCount ?? data?.TotalCount ?? responseData?.totalCount ?? responseData?.TotalCount ?? items.length);
-      const resPageNumber = Number(data?.pageNumber ?? data?.PageNumber ?? responseData?.pageNumber ?? responseData?.PageNumber ?? pageNumber);
-      const resPageSize = Number(data?.pageSize ?? data?.PageSize ?? responseData?.pageSize ?? responseData?.PageSize ?? pageSize);
+      let items: any[] = [];
+      if (Array.isArray(dataContainer)) {
+        items = dataContainer;
+      } else if (Array.isArray(dataContainer?.items)) {
+        items = dataContainer.items;
+      } else if (Array.isArray(dataContainer?.Items)) {
+        items = dataContainer.Items;
+      } else if (Array.isArray(responseData?.items)) {
+        items = responseData.items;
+      } else if (Array.isArray(responseData?.Items)) {
+        items = responseData.Items;
+      }
+
+      const totalCount = Number(
+        dataContainer?.totalCount ??
+        dataContainer?.TotalCount ??
+        responseData?.totalCount ??
+        responseData?.TotalCount ??
+        items.length
+      );
+      const resPageNumber = Number(
+        dataContainer?.pageNumber ??
+        dataContainer?.PageNumber ??
+        responseData?.pageNumber ??
+        responseData?.PageNumber ??
+        pageNumber
+      );
+      const resPageSize = Number(
+        dataContainer?.pageSize ??
+        dataContainer?.PageSize ??
+        responseData?.pageSize ??
+        responseData?.PageSize ??
+        pageSize
+      );
 
       const mappedUsers: PortalUser[] = items.map((u: any) => {
         let userStatus: 'Active' | 'Inactive' | 'Pending' = 'Active';
         const rawStatus = String(u.status || u.Status || 'Active').trim();
-        if (rawStatus === 'Inactive' || rawStatus === 'Pending') {
-          userStatus = rawStatus;
-        } else if (rawStatus.toLowerCase() === 'inactive') {
+        if (rawStatus === 'Inactive' || rawStatus.toLowerCase() === 'inactive') {
           userStatus = 'Inactive';
-        } else if (rawStatus.toLowerCase() === 'pending') {
+        } else if (rawStatus === 'Pending' || rawStatus.toLowerCase() === 'pending') {
           userStatus = 'Pending';
         }
+
+        const isConfirmed = Boolean(
+          u.isEmailConfirmed ??
+          u.IsEmailConfirmed ??
+          u.verified ??
+          u.Verified ??
+          true
+        );
+
+        const memberSinceRaw = u.memberSince || u.MemberSince || u.joinDate || u.JoinDate || u.createdDate || u.CreatedDate;
+        let formattedJoinDate = new Date().toISOString().split('T')[0];
+        if (memberSinceRaw) {
+          try {
+            formattedJoinDate = new Date(memberSinceRaw).toISOString().split('T')[0];
+          } catch {
+            formattedJoinDate = String(memberSinceRaw);
+          }
+        }
+
         return {
           id: String(u.id || u.Id || `user-${Math.random()}`),
-          name: String(u.name || u.Name || 'Unknown Curator'),
+          name: String(u.name || u.Name || 'Unknown User'),
           email: String(u.email || u.Email || ''),
           role: String(u.role || u.Role || 'Contributor'),
+          isEmailConfirmed: isConfirmed,
+          memberSince: formattedJoinDate,
           status: userStatus,
-          avatarUrl: String(u.avatarUrl || u.AvatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150'),
-          verified: Boolean(u.verified ?? u.Verified ?? u.emailConfirmed ?? u.EmailConfirmed ?? true),
-          joinDate: String(u.joinDate || u.JoinDate || u.createdDate || u.CreatedDate || new Date().toISOString().split('T')[0]),
+          avatarUrl: String(
+            u.avatarUrl ||
+            u.AvatarUrl ||
+            'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150'
+          ),
+          verified: isConfirmed,
+          joinDate: formattedJoinDate,
           permissions: u.permissions || u.Permissions || ['Create Entry', 'Save Drafts'],
         };
       });

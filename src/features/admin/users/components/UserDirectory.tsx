@@ -148,7 +148,7 @@ export default function UserDirectory({
               />
             </div>
 
-            {/* Status Filter Dropdown */}
+            {/* Role Filter Dropdown */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Filter size={16} className="text-stone-400 shrink-0" />
               <select
@@ -157,16 +157,18 @@ export default function UserDirectory({
                 onChange={(e) => onStatusFilterChange(e.target.value)}
                 className="w-full sm:w-auto bg-stone-50 border border-stone-200 rounded-lg p-2 text-xs text-stone-700 font-semibold focus:outline-none cursor-pointer"
               >
-                <option value="ALL">All Accounts</option>
-                <option value="Active">Active Curators</option>
-                <option value="Pending">Pending Validation</option>
-                <option value="Inactive">Deactivated Accounts</option>
+                <option value="ALL">All Roles</option>
+                <option value="Admin">Admin</option>
+                <option value="Archivist">Archivist</option>
+                <option value="Contributor">Contributor</option>
+                <option value="Theologian">Theologian</option>
+                <option value="Chief Editor">Chief Editor</option>
               </select>
             </div>
           </div>
 
           <div className="text-xs text-stone-400 font-semibold select-none shrink-0">
-            {totalItems} ARCHIVISTS MATCHED
+            {totalItems} USERS MATCHED
           </div>
         </div>
 
@@ -187,7 +189,7 @@ export default function UserDirectory({
                     onClick={() => onSortChange('name')}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span>Curator Profile</span>
+                      <span>Name</span>
                       {renderSortIndicator('name')}
                     </div>
                   </th>
@@ -196,7 +198,7 @@ export default function UserDirectory({
                     onClick={() => onSortChange('email')}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span>Email Address</span>
+                      <span>Email</span>
                       {renderSortIndicator('email')}
                     </div>
                   </th>
@@ -205,103 +207,116 @@ export default function UserDirectory({
                     onClick={() => onSortChange('role')}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span>System Role</span>
+                      <span>Role</span>
                       {renderSortIndicator('role')}
                     </div>
                   </th>
-                  <th className="py-4 px-6">Verification</th>
-                  <th 
-                    className="py-4 px-6 cursor-pointer hover:bg-stone-100/50 transition-colors group"
-                    onClick={() => onSortChange('status')}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Account Status</span>
-                      {renderSortIndicator('status')}
-                    </div>
-                  </th>
+                  <th className="py-4 px-6">Email Confirmed</th>
+                  <th className="py-4 px-6">Member Since</th>
+                  <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100 text-sm text-stone-600">
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-stone-400 italic font-serif">
-                      No curator records found matching your filters.
+                    <td colSpan={6} className="py-12 text-center text-stone-400 italic font-serif">
+                      No user records found matching your query.
                     </td>
                   </tr>
                 ) : (
-                  users.map((usr) => (
-                    <tr 
-                      id={`user-row-${usr.id}`}
-                      key={usr.id} 
-                      onClick={() => onSelectUser(usr.id)}
-                      className={`hover:bg-amber-500/5 cursor-pointer transition-colors ${
-                        selectedUser?.id === usr.id ? 'bg-amber-500/5' : ''
-                      }`}
-                    >
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={usr.avatarUrl} 
-                            alt={usr.name}
-                            className="w-10 h-10 rounded-full object-cover border border-stone-200"
-                            referrerPolicy="no-referrer"
-                          />
-                          <div className="flex flex-col">
+                  users.map((usr) => {
+                    const isConfirmed = usr.isEmailConfirmed ?? usr.verified ?? false;
+                    const dateRaw = usr.memberSince || usr.joinDate;
+                    let formattedDate = 'N/A';
+                    if (dateRaw) {
+                      try {
+                        const d = new Date(dateRaw);
+                        formattedDate = isNaN(d.getTime()) ? String(dateRaw) : d.toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        });
+                      } catch {
+                        formattedDate = String(dateRaw);
+                      }
+                    }
+
+                    return (
+                      <tr 
+                        id={`user-row-${usr.id}`}
+                        key={usr.id} 
+                        onClick={() => onSelectUser(usr.id)}
+                        className={`hover:bg-amber-500/5 cursor-pointer transition-colors ${
+                          selectedUser?.id === usr.id ? 'bg-amber-500/5' : ''
+                        }`}
+                      >
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={usr.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(usr.name)}&background=d97706&color=fff`} 
+                              alt={usr.name}
+                              className="w-9 h-9 rounded-full object-cover border border-stone-200 shrink-0"
+                              referrerPolicy="no-referrer"
+                            />
                             <span className="font-serif font-bold text-stone-900 text-base">{usr.name}</span>
-                            <span className="text-[10px] text-stone-400 select-none">Member since {usr.joinDate}</span>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-stone-600 font-medium">{usr.email}</td>
-                      <td className="py-4 px-6">
-                        <span className="bg-stone-100 text-stone-700 text-xs font-semibold px-2 py-0.5 rounded border border-stone-200">
-                          {usr.role}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6">
-                        {usr.verified ? (
-                          <span className="text-amber-700 flex items-center gap-1 text-xs font-bold select-none">
-                            <ShieldCheck size={16} />
-                            <span>Verified Scribe</span>
+                        </td>
+                        <td className="py-4 px-6 text-stone-600 font-medium">{usr.email}</td>
+                        <td className="py-4 px-6">
+                          <span className="bg-stone-100 text-stone-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-stone-200 inline-block">
+                            {usr.role}
                           </span>
-                        ) : (
-                          <span className="text-stone-400 flex items-center gap-1 text-xs font-medium select-none">
-                            <span>Unverified</span>
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className={`text-[10px] uppercase font-bold px-2.5 py-1 rounded-full border ${
-                          usr.status === 'Active' 
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-500/20' 
-                            : usr.status === 'Pending'
-                            ? 'bg-amber-50 text-amber-800 border-amber-500/20'
-                            : 'bg-stone-100 text-stone-600 border-stone-300'
-                        }`}>
-                          {usr.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="py-4 px-6">
+                          {isConfirmed ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full select-none">
+                              <span>✔ Confirmed</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-stone-500 bg-stone-100 border border-stone-200 px-2.5 py-1 rounded-full select-none">
+                              <span>✖ Not Confirmed</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-stone-600 text-xs font-medium">
+                          {formattedDate}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            id={`btn-view-${usr.id}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectUser(usr.id);
+                            }}
+                            className="text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Reusable Pagination Controls */}
-        <div className="shrink-0 pt-4">
-          <Pagination
-            id="users-pagination"
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalItems={totalItems}
-            totalPages={totalPages}
-            onPageChange={onPageChange}
-            onPageSizeChange={onPageSizeChange}
-            isLoading={isTableLoading}
-          />
-        </div>
+        {/* Reusable Pagination Controls - hidden when empty */}
+        {users.length > 0 && (
+          <div className="shrink-0 pt-4">
+            <Pagination
+              id="users-pagination"
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={totalItems}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+              onPageSizeChange={onPageSizeChange}
+              isLoading={isTableLoading}
+            />
+          </div>
+        )}
       </div>
 
       {/* Slide-out Profile Details Drawer (Right Side) */}

@@ -181,6 +181,7 @@ export function usePendingReviews() {
     error,
     activeReviewId,
     setActiveReviewId,
+    activeReviewStory: activeStoryDetails,
     activeStoryDetails,
     loadingDetails,
     handleApprove,

@@ -125,13 +125,9 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
           {/* ACCEPT / APPROVE (status = 1) */}
           <button
             id="btn-approve"
-            disabled={!isAllChecked || isSubmitting}
+            disabled={isSubmitting}
             onClick={handleAcceptClick}
-            className={`text-xs font-bold py-2 px-5 rounded-lg flex items-center gap-1.5 shadow transition-all ${
-              isAllChecked && !isSubmitting
-                ? 'bg-amber-600 hover:bg-amber-700 text-white cursor-pointer'
-                : 'bg-stone-200 text-stone-400 cursor-not-allowed shadow-none'
-            }`}
+            className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 px-5 rounded-lg flex items-center gap-1.5 shadow transition-all cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle size={15} />}
             <span>Accept & Publish (1)</span>
@@ -173,6 +169,70 @@ export default function StoryReview({ story, onGoBack, onApprove, onReject, onRe
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sanctuary & Burial Place */}
+          {story.burialPlace && (story.burialPlace.sanctuaryName || story.burialPlace.physicalAddress || story.burialPlace.description) && (
+            <div className="bg-white border border-stone-200 p-8 rounded-xl shadow-sm space-y-4">
+              <h3 className="font-serif text-lg font-bold text-stone-800 border-b border-stone-100 pb-3 flex items-center gap-2">
+                <MapPin size={18} className="text-amber-600" />
+                <span>Sanctuary & Burial Place</span>
+              </h3>
+              <div className="space-y-3 text-xs">
+                {story.burialPlace.sanctuaryName && (
+                  <div>
+                    <span className="font-bold text-stone-500 uppercase text-[10px]">Sanctuary Name:</span>
+                    <p className="font-serif text-stone-900 font-bold text-base">{story.burialPlace.sanctuaryName}</p>
+                  </div>
+                )}
+                {story.burialPlace.physicalAddress && (
+                  <div>
+                    <span className="font-bold text-stone-500 uppercase text-[10px]">Address:</span>
+                    <p className="text-stone-700 font-medium">{story.burialPlace.physicalAddress}</p>
+                  </div>
+                )}
+                {story.burialPlace.description && (
+                  <div>
+                    <span className="font-bold text-stone-500 uppercase text-[10px]">Shrine Description:</span>
+                    <p className="text-stone-600 leading-relaxed mt-0.5">{story.burialPlace.description}</p>
+                  </div>
+                )}
+                {(story.burialPlace as any).googleMapsUrl && (
+                  <div className="pt-2">
+                    <a
+                      href={(story.burialPlace as any).googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-amber-700 hover:text-amber-800 font-bold underline"
+                    >
+                      <MapPin size={13} />
+                      <span>View on Google Maps</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Documentary Video */}
+          {story.documentaryMedia?.url && (
+            <div className="bg-white border border-stone-200 p-8 rounded-xl shadow-sm space-y-4">
+              <h3 className="font-serif text-lg font-bold text-stone-800 border-b border-stone-100 pb-3 flex items-center gap-2">
+                <Play size={18} className="text-amber-600" />
+                <span>Documentary Video</span>
+              </h3>
+              <div className="flex items-center gap-3 p-3 bg-stone-50 rounded-lg border border-stone-200">
+                <Play size={20} className="text-amber-600 shrink-0" />
+                <a
+                  href={story.documentaryMedia.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-700 font-bold text-xs truncate hover:underline"
+                >
+                  {story.documentaryMedia.url}
+                </a>
               </div>
             </div>
           )}

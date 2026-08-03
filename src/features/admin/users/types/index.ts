@@ -8,9 +8,11 @@ export interface PortalUser {
   name: string;
   email: string;
   role: string;
-  status: 'Active' | 'Inactive' | 'Pending';
-  avatarUrl: string;
-  verified: boolean;
-  joinDate: string;
-  permissions: string[];
+  isEmailConfirmed?: boolean;
+  memberSince?: string;
+  status?: 'Active' | 'Inactive' | 'Pending';
+  avatarUrl?: string;
+  verified?: boolean;
+  joinDate?: string;
+  permissions?: string[];
 }

@@ -13,7 +13,8 @@ import {
   Sliders,
   Sparkles,
   BookOpen,
-  Calendar
+  Calendar,
+  Pencil
 } from 'lucide-react';
 import { SacredStory } from '../types';
 import Pagination from '../../shared/components/Pagination';
@@ -29,6 +30,7 @@ interface ArchiveListProps {
   sortOrder: 'asc' | 'desc';
   onSortChange: (field: string, order: 'asc' | 'desc') => void;
   onSelectStory: (id: string) => void;
+  onEditStory: (story: SacredStory) => void;
   onDeleteStory: (id: string) => void;
 
   // Pagination State
@@ -52,6 +54,7 @@ export default function ArchiveList({
   sortOrder,
   onSortChange,
   onSelectStory,
+  onEditStory,
   onDeleteStory,
   currentPage,
   pageSize,
@@ -210,14 +213,25 @@ export default function ArchiveList({
                 </div>
 
                 {/* Actions Footer */}
-                <div className="border-t border-stone-100 p-4 bg-stone-50/50 flex items-center justify-between gap-2">
+                <div className="border-t border-stone-100 p-3 bg-stone-50/50 flex items-center justify-between gap-1.5">
                   <button
                     id={`btn-archive-view-${story.id}`}
                     onClick={() => onSelectStory(story.id)}
-                    className="bg-white hover:bg-stone-100 text-stone-700 hover:text-stone-950 font-bold py-1.5 px-3 rounded text-xs border border-stone-200 shadow-sm flex items-center gap-1 transition-colors cursor-pointer"
+                    className="bg-white hover:bg-stone-100 text-stone-700 hover:text-stone-950 font-semibold py-1.5 px-2.5 rounded text-[11px] border border-stone-200 shadow-sm flex items-center gap-1 transition-colors cursor-pointer"
+                    title="View Immersive Exhibit"
                   >
                     <Eye size={12} />
-                    <span>Immersive Exhibit</span>
+                    <span>View</span>
+                  </button>
+
+                  <button
+                    id={`btn-archive-edit-${story.id}`}
+                    onClick={() => onEditStory(story)}
+                    className="bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold py-1.5 px-2.5 rounded text-[11px] border border-amber-200/60 shadow-sm flex items-center gap-1 transition-colors cursor-pointer"
+                    title="Edit Story"
+                  >
+                    <Pencil size={12} />
+                    <span>Edit</span>
                   </button>
 
                   <button
@@ -227,9 +241,11 @@ export default function ArchiveList({
                         onDeleteStory(story.id);
                       }
                     }}
-                    className="text-stone-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                    className="bg-red-50 hover:bg-red-100 text-red-700 font-semibold py-1.5 px-2.5 rounded text-[11px] border border-red-200/60 transition-colors cursor-pointer flex items-center gap-1"
+                    title="Delete Story"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={12} />
+                    <span>Delete</span>
                   </button>
                 </div>
               </div>

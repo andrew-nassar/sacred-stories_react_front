@@ -14,16 +14,20 @@ import {
   Play,
   Bookmark,
   ExternalLink,
-  ShieldAlert
+  ShieldAlert,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { SacredStory } from '../types';
 
 interface ImmersivePreviewProps {
   story: SacredStory;
   onGoBack: () => void;
+  onEditStory?: (story: SacredStory) => void;
+  onDeleteStory?: (id: string) => void;
 }
 
-export default function ImmersivePreview({ story, onGoBack }: ImmersivePreviewProps) {
+export default function ImmersivePreview({ story, onGoBack, onEditStory, onDeleteStory }: ImmersivePreviewProps) {
   return (
     <div id="immersive-preview-panel" className="flex-1 overflow-y-auto p-8 bg-[#FAF9F5]/30 space-y-8 animate-in fade-in duration-300">
       {/* Header and Return */}
@@ -50,14 +54,33 @@ export default function ImmersivePreview({ story, onGoBack }: ImmersivePreviewPr
             <User size={12} className="text-stone-400" />
             <span>Submitted by: {story.submittedBy}</span>
           </span>
-          <button
-            id="btn-play-virtual-preview"
-            onClick={() => alert(`Opening standard preview frame simulation for: ${story.sacredName}`)}
-            className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 px-4 rounded-lg flex items-center gap-1.5 shadow transition-colors"
-          >
-            <ExternalLink size={14} />
-            <span>Launch Exhibit Screen</span>
-          </button>
+
+          {onEditStory && (
+            <button
+              id="btn-preview-edit"
+              onClick={() => onEditStory(story)}
+              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 px-3.5 rounded-lg flex items-center gap-1.5 shadow transition-colors cursor-pointer"
+            >
+              <Pencil size={14} />
+              <span>Edit Story</span>
+            </button>
+          )}
+
+          {onDeleteStory && (
+            <button
+              id="btn-preview-delete"
+              onClick={() => {
+                if (window.confirm(`Are you sure you want to permanently DELETE the chronicle: ${story.sacredName}? This action is irreversible.`)) {
+                  onDeleteStory(story.id);
+                  onGoBack();
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-3.5 rounded-lg flex items-center gap-1.5 shadow transition-colors cursor-pointer"
+            >
+              <Trash2 size={14} />
+              <span>Delete</span>
+            </button>
+          )}
         </div>
       </div>
 

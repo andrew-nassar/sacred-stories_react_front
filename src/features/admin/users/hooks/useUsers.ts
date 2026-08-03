@@ -5,14 +5,14 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { PortalUser } from '../types';
-import { UsersService } from '@/src/features/admin/services/users.service';
+import { UsersApi } from '../api/users.api';
 
 export function useUsers() {
   const [users, setUsers] = useState<PortalUser[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Pagination parameters stored in sessionStorage to remember when navigating within same feature
+  // Pagination parameters stored in sessionStorage
   const [currentPage, setCurrentPage] = useState(() => {
     if (typeof window !== 'undefined') {
       const val = sessionStorage.getItem('users_currentPage');
@@ -61,7 +61,7 @@ export function useUsers() {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  // Sync state to sessionStorage whenever it changes
+  // Sync state to sessionStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('users_currentPage', String(currentPage));
@@ -102,23 +102,23 @@ export function useUsers() {
     try {
       setLoading(true);
       setError(null);
-      const res = await UsersService.getUsers(
-        currentPage,
+      const res = await UsersApi.getUsers({
+        pageNumber: currentPage,
         pageSize,
-        searchQuery,
-        statusFilter === 'ALL' ? undefined : statusFilter
-      );
+        searchTerm: searchQuery,
+        role: statusFilter === 'ALL' ? undefined : statusFilter,
+      });
       setUsers(res.items);
       setTotalItems(res.totalCount);
       const computedPages = Math.max(1, Math.ceil(res.totalCount / pageSize));
       setTotalPages(computedPages);
       
-      // Keep page valid
-      if (res.pageNumber !== currentPage && res.pageNumber > 0) {
+      if (res.pageNumber !== currentPage && res.pageNumber > 0 && res.pageNumber <= computedPages) {
         setCurrentPage(res.pageNumber);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch curators and scribes');
+      console.error('[useUsers] Load error:', err);
+      setError(err.message || 'Failed to fetch users from server');
     } finally {
       setLoading(false);
     }
@@ -173,7 +173,7 @@ export function useUsers() {
 
   const handleUpdateUser = useCallback(async (updatedUser: PortalUser) => {
     try {
-      await UsersService.updateUser(updatedUser);
+      await UsersApi.updateUser(updatedUser);
       await loadUsers();
       window.dispatchEvent(new Event('refresh-users'));
     } catch (err: any) {
@@ -183,7 +183,7 @@ export function useUsers() {
 
   const handleDeleteUser = useCallback(async (userId: string) => {
     try {
-      const success = await UsersService.deleteUser(userId);
+      const success = await UsersApi.deleteUser(userId);
       if (success) {
         if (selectedUserId === userId) {
           setSelectedUserId(null);

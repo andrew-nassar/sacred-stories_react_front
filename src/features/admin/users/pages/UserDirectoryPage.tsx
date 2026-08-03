@@ -23,6 +23,7 @@ export default function UserDirectoryPage() {
     setSelectedUserId,
     handleUpdateUser,
     handleDeleteUser,
+    refreshUsers,
     currentPage,
     pageSize,
     totalPages,
@@ -42,12 +43,19 @@ export default function UserDirectoryPage() {
     );
   }
 
-  if (error) {
+  if (error && users.length === 0) {
     return (
       <div id="users-error" className="flex-1 flex flex-col items-center justify-center p-8 bg-[#FAF9F5]/30">
-        <div className="text-center space-y-4 max-w-md">
-          <p className="text-red-600 font-bold">✙ Directory Connection Error</p>
+        <div className="text-center space-y-4 max-w-md bg-white p-8 rounded-xl border border-stone-200 shadow-sm">
+          <p className="text-red-600 font-bold text-base">Directory Connection Error</p>
           <p className="text-stone-500 text-xs leading-normal">{error}</p>
+          <button
+            id="btn-retry-users"
+            onClick={() => refreshUsers()}
+            className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-2 rounded-lg text-xs shadow transition-colors cursor-pointer"
+          >
+            Retry Request
+          </button>
         </div>
       </div>
     );

@@ -277,6 +277,21 @@ async function startServer() {
   app.get("/api/SacredStories", handleGetSacredStories);
   app.get("/api/sacredstories", handleGetSacredStories);
 
+  // GET /api/SacredStories/types
+  const handleGetSacredStoryTypes = (_req: express.Request, res: express.Response) => {
+    return res.json([
+      { id: 0, name: "Hermit", displayName: "متوحد" },
+      { id: 1, name: "Saint", displayName: "قديس" },
+      { id: 2, name: "Martyr", displayName: "شهيد" },
+      { id: 3, name: "Patriarch", displayName: "بطريرك" },
+      { id: 4, name: "Archpriest", displayName: "قمص" },
+      { id: 5, name: "Pope", displayName: "بابا" }
+    ]);
+  };
+
+  app.get("/api/SacredStories/types", handleGetSacredStoryTypes);
+  app.get("/api/sacredstories/types", handleGetSacredStoryTypes);
+
   // GET /api/SacredStories/:id (Detail view)
   const handleGetSacredStoryById = (req: express.Request, res: express.Response) => {
     try {
@@ -311,6 +326,158 @@ async function startServer() {
 
   app.get("/api/SacredStories/:id", handleGetSacredStoryById);
   app.get("/api/sacredstories/:id", handleGetSacredStoryById);
+
+  // POST /api/SacredStories
+  const handleCreateSacredStory = (req: express.Request, res: express.Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+          statusCode: 401,
+          succeeded: false,
+          message: "User is not authenticated.",
+          data: null
+        });
+      }
+
+      const body = req.body || {};
+      const newStory = {
+        id: `story-${Date.now()}`,
+        type: typeof body.type === 'number' ? body.type : 0,
+        name: body.name || "Untitled Sacred Story",
+        coverImage: body.coverImage || "",
+        famousQuote: body.famousQuote || "",
+        videoUrl: body.videoUrl || "",
+        biography: body.biography || "",
+        burialPlace: body.burialPlace || {
+          name: "",
+          description: "",
+          address: "",
+          latitude: 0,
+          longitude: 0,
+          googleMapsUrl: "",
+          coverImage: ""
+        },
+        timeline: Array.isArray(body.timeline) ? body.timeline : [],
+        sacredGallery: Array.isArray(body.sacredGallery) ? body.sacredGallery : [],
+        status: 0,
+        rejectionReason: null,
+        createdAt: new Date().toISOString()
+      };
+
+      MOCK_SACRED_STORIES.unshift(newStory);
+
+      return res.json({
+        statusCode: 200,
+        succeeded: true,
+        message: "Sacred story created successfully",
+        data: newStory
+      });
+    } catch (error: any) {
+      console.error("Error in POST /api/SacredStories:", error);
+      return res.status(500).json({
+        statusCode: 500,
+        succeeded: false,
+        message: "Failed to create sacred story",
+        data: null
+      });
+    }
+  };
+
+  app.post("/api/SacredStories", handleCreateSacredStory);
+  app.post("/api/sacredstories", handleCreateSacredStory);
+
+  // GET /api/Auth/users
+  const handleGetAuthUsers = (req: express.Request, res: express.Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+          statusCode: 401,
+          meta: null,
+          succeeded: false,
+          message: "User is not authenticated.",
+          errors: null,
+          data: null
+        });
+      }
+
+      const searchTerm = req.query.searchTerm ? String(req.query.searchTerm).trim().toLowerCase() : "";
+      const pageNumber = Math.max(1, parseInt(String(req.query.pageNumber || 1), 10));
+      const pageSize = Math.max(1, parseInt(String(req.query.pageSize || 10), 10));
+
+      const mockUsers = [
+        {
+          id: "e8a91b2c-3d4e-5f6a-7b8c-9d0e1f2a3b4c",
+          name: "Nikolaos of Myra",
+          email: "n.myra@sacredstories.org",
+          role: "Archivist",
+          isEmailConfirmed: true,
+          memberSince: "2024-01-15T09:00:00Z"
+        },
+        {
+          id: "f9b02c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+          name: "Sister Catherine of Siena",
+          email: "catherine.siena@sacredstories.org",
+          role: "Chief Editor",
+          isEmailConfirmed: true,
+          memberSince: "2024-02-01T10:30:00Z"
+        },
+        {
+          id: "a0c13d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+          name: "Brother Thomas Aquinas",
+          email: "t.aquinas@sacredstories.org",
+          role: "Theologian",
+          isEmailConfirmed: true,
+          memberSince: "2024-02-20T14:15:00Z"
+        },
+        {
+          id: "b1d24e5f-6a7b-8c9d-0e1f-2a3b4c5d6e7f",
+          name: "Teresa of Ávila",
+          email: "teresa.avila@sacredstories.org",
+          role: "Contributor",
+          isEmailConfirmed: false,
+          memberSince: "2024-03-05T11:45:00Z"
+        }
+      ];
+
+      let filtered = [...mockUsers];
+      if (searchTerm) {
+        filtered = filtered.filter(u =>
+          u.name.toLowerCase().includes(searchTerm) ||
+          u.email.toLowerCase().includes(searchTerm) ||
+          u.role.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      const totalCount = filtered.length;
+      const startIndex = (pageNumber - 1) * pageSize;
+      const items = filtered.slice(startIndex, startIndex + pageSize);
+
+      return res.json({
+        statusCode: 200,
+        succeeded: true,
+        message: "Users retrieved successfully",
+        data: {
+          items,
+          totalCount,
+          pageNumber,
+          pageSize,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error in GET /api/Auth/users:", error);
+      return res.status(500).json({
+        statusCode: 500,
+        succeeded: false,
+        message: "Failed to retrieve users",
+        data: null
+      });
+    }
+  };
+
+  app.get("/api/Auth/users", handleGetAuthUsers);
+  app.get("/api/auth/users", handleGetAuthUsers);
 
   // API Route: Search the archives (Dynamic Saint synthesis using Gemini!)
   app.post("/api/search-archives", async (req, res) => {

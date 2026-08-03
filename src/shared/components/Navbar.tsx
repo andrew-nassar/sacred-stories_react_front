@@ -1,5 +1,6 @@
 import React from "react";
-import { Search, User, Sparkles, Compass, Sun, Moon, LogOut } from "lucide-react";
+import { Search, User, Sparkles, Compass, Sun, Moon, LogOut, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useSacredStore, TabId } from "../../shared/store/sacredStore";
 import { translations } from "../../shared/translations/translations";
@@ -10,6 +11,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onOpenAuthModal }: NavbarProps) {
+  const navigate = useNavigate();
   const {
     currentTab,
     setCurrentTab,
@@ -34,6 +36,17 @@ export default function Navbar({ onOpenAuthModal }: NavbarProps) {
     { id: "about", label: t.about },
   ];
 
+  const handleHomeClick = () => {
+    if (isAuthenticated && currentUser) {
+      const role = (currentUser.role || "").toLowerCase();
+      if (["admin", "archivist", "chief editor"].includes(role)) {
+        navigate("/admin/dashboard");
+        return;
+      }
+    }
+    setCurrentTab("home");
+  };
+
   const handleSearchClick = () => {
     setCurrentTab("saints");
     setSearchQueryPass("");
@@ -43,7 +56,7 @@ export default function Navbar({ onOpenAuthModal }: NavbarProps) {
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-white/5 px-4 sm:px-6 md:px-8 lg:px-12 py-3 md:py-4 flex items-center justify-between">
       {/* Logo */}
       <div 
-        onClick={() => setCurrentTab("home")}
+        onClick={handleHomeClick}
         className="flex items-center gap-1.5 md:gap-2 cursor-pointer group shrink-0"
       >
         <Compass className="w-4 h-4 md:w-5 md:h-5 text-gold-accent group-hover:rotate-45 transition-transform duration-500" />
@@ -59,7 +72,13 @@ export default function Navbar({ onOpenAuthModal }: NavbarProps) {
           return (
             <button
               key={item.id}
-              onClick={() => setCurrentTab(item.id)}
+              onClick={() => {
+                if (item.id === "home") {
+                  handleHomeClick();
+                } else {
+                  setCurrentTab(item.id);
+                }
+              }}
               className={`relative text-[11px] lg:text-sm tracking-wider lg:tracking-widest uppercase font-mono transition-colors duration-300 py-1 ${
                 isActive ? "text-gold-accent font-medium" : "text-white/60 hover:text-white"
               }`}
@@ -119,6 +138,16 @@ export default function Navbar({ onOpenAuthModal }: NavbarProps) {
         {/* Auth / User Profile Section */}
         {isAuthenticated ? (
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Submit Sacred Story button */}
+            <button
+              onClick={() => navigate('/create-story')}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-gold-accent/10 border border-gold-accent/30 text-gold-accent hover:bg-gold-accent hover:text-black font-mono text-xs font-semibold transition-all duration-300"
+              title="Submit a Sacred Story"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline uppercase">Submit Story</span>
+            </button>
+
             {/* Username Display Badge */}
             <div
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] md:text-xs font-mono text-white/80"

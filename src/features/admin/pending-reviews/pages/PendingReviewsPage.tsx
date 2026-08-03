@@ -15,6 +15,7 @@ export default function PendingReviewsPage() {
     error,
     setActiveReviewId,
     activeReviewStory,
+    loadingDetails,
     handleApprove,
     handleReject,
     handleRequestRevisions,
@@ -30,6 +31,17 @@ export default function PendingReviewsPage() {
     onPageChange,
     onPageSizeChange
   } = usePendingReviews();
+
+  if (loadingDetails) {
+    return (
+      <div id="pending-details-loading" className="flex-1 flex flex-col items-center justify-center p-8 bg-[#FAF9F5]/30">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
+          <span className="font-serif text-sm font-semibold text-stone-600">Retrieving Sacred Story Details...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (loading && pendingStories.length === 0) {
     return (

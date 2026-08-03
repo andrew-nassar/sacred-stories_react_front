@@ -3,53 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { executeApiCall } from '../../shared/api/base';
-import { SacredStory } from '../types';
-
-const STORIES_LOCAL_STORAGE_KEY = 'sacred_stories_data';
-
-function getStoredStories(): SacredStory[] {
-  if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem(STORIES_LOCAL_STORAGE_KEY);
-  if (!stored) return [];
-  try {
-    return JSON.parse(stored);
-  } catch (e) {
-    return [];
-  }
-}
-
-function saveStoredStories(stories: SacredStory[]) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORIES_LOCAL_STORAGE_KEY, JSON.stringify(stories));
-  }
-}
+import { api } from '@/src/features/admin/services/auth.service';
+import { CreateStoryPayload, StoryTypeOption } from '../types';
 
 export const CreateStoryApi = {
-  publishStory: async (story: SacredStory): Promise<SacredStory> => {
-    const stories = getStoredStories();
-    const index = stories.findIndex(s => s.id === story.id);
-    const updated = [...stories];
-
-    if (index >= 0) {
-      updated[index] = story;
-    } else {
-      updated.push(story);
+  getStoryTypes: async (): Promise<StoryTypeOption[]> => {
+    try {
+      const response = await api.get('/api/SacredStories/types');
+      const data = response.data?.data || response.data;
+      if (Array.isArray(data)) {
+        return data;
+      }
+      return [];
+    } catch (error) {
+      console.error('[CreateStoryApi] Failed to fetch story types:', error);
+      return [
+        { id: 0, name: "Hermit", displayName: "متوحد" },
+        { id: 1, name: "Saint", displayName: "قديس" },
+        { id: 2, name: "Martyr", displayName: "شهيد" },
+        { id: 3, name: "Patriarch", displayName: "بطريرك" },
+        { id: 4, name: "Archpriest", displayName: "قمص" },
+        { id: 5, name: "Pope", displayName: "بابا" }
+      ];
     }
-    saveStoredStories(updated);
+  },
 
-    return executeApiCall(
-      async () => {
-        const response = await fetch('/api/stories', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(story),
-        });
-        if (!response.ok) throw new Error('API failed');
-        return response.json();
-      },
-      story,
-      `publishStory(${story.id})`
-    );
+  createStory: async (payload: CreateStoryPayload): Promise<any> => {
+    const response = await api.post('/api/SacredStories', payload);
+    return response.data?.data || response.data;
   }
 };

@@ -3,13 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useStories } from '../hooks/useStories';
 import ArchiveList from '../components/ArchiveList';
 import ImmersivePreview from '../components/ImmersivePreview';
-import { Sliders } from 'lucide-react';
+import EditStoryModal from '../components/EditStoryModal';
+import { SacredStory } from '../types';
 
 export default function ArchivePage() {
+  const [editingStory, setEditingStory] = useState<SacredStory | null>(null);
+
   const {
     stories,
     categories,
@@ -26,6 +29,7 @@ export default function ArchivePage() {
     setActiveStoryId,
     activeStory,
     handleDeleteStory,
+    handleSaveStory,
     currentPage,
     pageSize,
     totalPages,
@@ -58,35 +62,58 @@ export default function ArchivePage() {
 
   if (activeStory) {
     return (
-      <ImmersivePreview
-        story={activeStory}
-        onGoBack={() => setActiveStoryId(null)}
-      />
+      <>
+        <ImmersivePreview
+          story={activeStory}
+          onGoBack={() => setActiveStoryId(null)}
+          onEditStory={(storyToEdit) => setEditingStory(storyToEdit)}
+          onDeleteStory={handleDeleteStory}
+        />
+        <EditStoryModal
+          story={editingStory}
+          isOpen={Boolean(editingStory)}
+          onClose={() => setEditingStory(null)}
+          onSave={async (updatedStory) => {
+            await handleSaveStory(updatedStory);
+          }}
+        />
+      </>
     );
   }
 
   return (
-    <ArchiveList
-      stories={stories}
-      categories={categories}
-      searchQuery={searchQuery}
-      onSearchChange={setSearchQuery}
-      selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
-      sortBy={sortBy}
-      sortOrder={sortOrder}
-      onSortChange={(field, order) => {
-        handleSortChange(field, order);
-      }}
-      onSelectStory={setActiveStoryId}
-      onDeleteStory={handleDeleteStory}
-      currentPage={currentPage}
-      pageSize={pageSize}
-      totalPages={totalPages}
-      totalItems={totalItems}
-      onPageChange={onPageChange}
-      onPageSizeChange={onPageSizeChange}
-      isLoading={loading}
-    />
+    <>
+      <ArchiveList
+        stories={stories}
+        categories={categories}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={(field, order) => {
+          handleSortChange(field, order);
+        }}
+        onSelectStory={setActiveStoryId}
+        onEditStory={(storyToEdit) => setEditingStory(storyToEdit)}
+        onDeleteStory={handleDeleteStory}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+        isLoading={loading}
+      />
+      <EditStoryModal
+        story={editingStory}
+        isOpen={Boolean(editingStory)}
+        onClose={() => setEditingStory(null)}
+        onSave={async (updatedStory) => {
+          await handleSaveStory(updatedStory);
+        }}
+      />
+    </>
   );
 }

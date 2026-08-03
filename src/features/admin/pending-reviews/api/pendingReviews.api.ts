@@ -34,32 +34,64 @@ export interface FetchPendingParams {
  * Helper to map backend story object to internal SacredStory model
  */
 export function mapStoryToUIModel(item: any): SacredStory {
+  const burial = item.burialPlace;
+  const chronology = item.timeline || item.chronology || [];
+  const gallery = item.sacredGallery || item.gallery || [];
+
   return {
     id: item.id?.toString() || '',
     sacredName: item.name || item.sacredName || 'Untitled',
-    devotionalCategory: SACRED_STORY_TYPES[item.type] ?? item.devotionalCategory ?? 'General',
+    devotionalCategory: typeof item.type === 'number' 
+      ? (SACRED_STORY_TYPES[item.type] ?? 'Saint')
+      : (item.devotionalCategory || 'Saint'),
     canonizationYear: (item.canonizationYear || new Date().getFullYear()).toString(),
     definingUtterance: item.famousQuote || item.definingUtterance || '',
-    veneratedNarrative: item.veneratedNarrative || item.description || '',
+    veneratedNarrative: item.biography || item.veneratedNarrative || item.description || '',
     accessControl: item.accessControl || { publicArchive: true, liturgicalCalendarTag: '' },
-    burialPlace: item.burialPlace || {
-      sanctuaryName: item.burialPlace?.sanctuaryName || '',
-      physicalAddress: item.burialPlace?.physicalAddress || '',
-      latitude: item.burialPlace?.latitude || '',
-      longitude: item.burialPlace?.longitude || '',
-      siteTypology: item.burialPlace?.siteTypology || '',
-      translationDate: item.burialPlace?.translationDate || '',
-      description: item.burialPlace?.description || '',
-    },
-    chronology: item.chronology || [],
-    gallery: item.coverImage
+    burialPlace: burial
+      ? {
+          sanctuaryName: burial.name || burial.sanctuaryName || '',
+          physicalAddress: burial.address || burial.physicalAddress || '',
+          latitude: burial.latitude !== undefined ? String(burial.latitude) : '',
+          longitude: burial.longitude !== undefined ? String(burial.longitude) : '',
+          siteTypology: burial.siteTypology || '',
+          translationDate: burial.translationDate || '',
+          description: burial.description || '',
+          googleMapsUrl: burial.googleMapsUrl || '',
+          coverImage: burial.coverImage || '',
+        } as any
+      : {
+          sanctuaryName: '',
+          physicalAddress: '',
+          latitude: '',
+          longitude: '',
+          siteTypology: '',
+          translationDate: '',
+          description: '',
+        },
+    chronology: chronology.map((t: any) => ({
+      id: t.id || '',
+      year: t.date || t.year || '',
+      eventTitle: t.title || t.eventTitle || '',
+      description: t.description || '',
+    })),
+    gallery: gallery.length > 0
+      ? gallery.map((g: any) => ({
+          id: g.id || '',
+          title: g.title || 'Sacred Icon',
+          imageUrl: g.imageUrl || '',
+          category: 'Gallery',
+        }))
+      : item.coverImage
       ? [{ id: 'cover', title: 'Cover Image', imageUrl: item.coverImage, category: 'Cover' }]
-      : item.gallery || [],
-    documentaryMedia: item.documentaryMedia || null,
+      : [],
+    documentaryMedia: item.videoUrl
+      ? { title: 'Documentary', duration: '', url: item.videoUrl }
+      : item.documentaryMedia || null,
     status: item.status === 0 ? 'Pending' : item.status === 1 ? 'Published' : 'Rejected',
     submittedBy: item.submittedBy || item.authorName || 'Anonymous',
     dateSubmitted: item.dateSubmitted || new Date().toISOString().split('T')[0],
-    editorialComments: item.editorialComments || '',
+    editorialComments: item.editorialComments || item.rejectionReason || '',
     editorialChecks: item.editorialChecks || {
       authenticityVerified: false,
       historicalCorroboration: false,
@@ -123,16 +155,12 @@ export const PendingReviewsApi = {
   updateStoryStatus: async (
     storyId: string, 
     status: number, 
-    comments: string = '', 
-    checks?: EditorialChecks
+    _comments: string = '', 
+    _checks?: EditorialChecks
   ): Promise<boolean> => {
     await apiFetch(`/api/SacredStories/${storyId}/status`, {
       method: 'PUT',
-      body: JSON.stringify({
-        status, // 1: Accept, 2: Reject, 0: Revision
-        editorialComments: comments,
-        editorialChecks: checks,
-      }),
+      body: JSON.stringify(status),
     });
     return true;
   },

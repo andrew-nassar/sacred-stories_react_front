@@ -109,7 +109,7 @@ export default function AdminIndexPage() {
       case 'users':
         return <UserDirectoryPage />;
       case 'creator':
-        return <CreateStoryPage />;
+        return <CreateStoryPage onNavigate={handleNavigate} />;
       case 'settings':
         return <SettingsPage />;
       default:

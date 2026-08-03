@@ -7,12 +7,25 @@ import React from 'react';
 import { useCreateStory } from '../hooks/useCreateStory';
 import CreatorFlow from '../components/CreatorFlow';
 
-export default function CreateStoryPage() {
+interface CreateStoryPageProps {
+  onNavigate?: (view: string) => void;
+}
+
+export default function CreateStoryPage({ onNavigate }: CreateStoryPageProps) {
   const formState = useCreateStory();
+
+  const handleGoBack = () => {
+    if (onNavigate) {
+      onNavigate('archive');
+    } else {
+      formState.setActiveStep(1);
+    }
+  };
 
   return (
     <CreatorFlow
-      onGoBack={() => formState.setActiveStep(1)}
+      onGoBack={handleGoBack}
+      onNavigate={onNavigate}
       formState={formState}
     />
   );

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { Saint } from "../../data";
+import { authStorage } from "../../shared/auth/authStorage";
 
 export type TabId = "home" | "saints" | "churches" | "timeline" | "about" | "saint-details";
 
@@ -50,9 +51,33 @@ export function SacredStoreProvider({ children }: { children: ReactNode }) {
 
   // Auth State Management
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return !!localStorage.getItem("accessToken") || !!localStorage.getItem("token");
+    return authStorage.isAuthenticated();
   });
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(() => {
+    return authStorage.getCurrentUser() as any;
+  });
+
+  // Sync auth state across storage and events
+  React.useEffect(() => {
+    const syncAuth = () => {
+      setIsAuthenticated(authStorage.isAuthenticated());
+      setCurrentUser(authStorage.getCurrentUser() as any);
+    };
+
+    window.addEventListener("storage", syncAuth);
+    window.addEventListener("admin-login", syncAuth);
+    window.addEventListener("admin-logout", syncAuth);
+    window.addEventListener("sacred-stories-logout", syncAuth);
+    window.addEventListener("sacred-stories-session-expired", syncAuth);
+
+    return () => {
+      window.removeEventListener("storage", syncAuth);
+      window.removeEventListener("admin-login", syncAuth);
+      window.removeEventListener("admin-logout", syncAuth);
+      window.removeEventListener("sacred-stories-logout", syncAuth);
+      window.removeEventListener("sacred-stories-session-expired", syncAuth);
+    };
+  }, []);
 
   const setCurrentTab = (tab: TabId) => {
     setCurrentTabState((prev) => {

@@ -15,7 +15,12 @@ export const DashboardService = {
   getMetrics: async (): Promise<BackendMetrics> => {
     try {
       // apiFetch automatically handles VITE_API_BASE_URL resolution and tokens
-      const response = await apiFetch<ApiResponse<BackendMetrics>>('/api/Dashboard/metrics');
+      const response = await apiFetch<ApiResponse<BackendMetrics>>('/api/Dashboard/metrics', {
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Accept': 'application/json' // يُفضل إضافته أيضاً لتأكيد استقبال JSON
+        }
+      });
       
       // Extract data from the Swagger envelope { statusCode, data: { ... } }
       const responseData = response?.data;

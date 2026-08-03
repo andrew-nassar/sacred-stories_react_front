@@ -17,9 +17,17 @@ export function useSaintDetails(selectedSaintId: string | null) {
       setError(null);
       try {
         const storyData = await getSacredStoryById(selectedSaintId);
-        if (isMounted) {
-          setData(storyData);
-        }
+
+const sortedTimeline = [...(storyData.timeline ?? [])].sort(
+  (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+);
+
+if (isMounted) {
+  setData({
+    ...storyData,
+    timeline: sortedTimeline,
+  });
+}
       } catch (err: any) {
         if (isMounted) {
           setError(err.message || "An error occurred while fetching details.");
