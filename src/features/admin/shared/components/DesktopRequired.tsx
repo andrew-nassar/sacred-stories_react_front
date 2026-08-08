@@ -149,11 +149,7 @@ export default function DesktopRequired() {
           <div className="pt-8 flex flex-col items-center gap-4">
             <button 
               onClick={() => {
-                if (window.history.length > 1) {
-                  navigate(-1);
-                } else {
-                  navigate('/');
-                }
+                navigate('/');
               }}
               className="sacred-button px-10 py-4 bg-[#f2ca50] text-[#3c2f00] font-semibold rounded-lg flex items-center gap-2 group cursor-pointer"
               style={{ fontFamily: "'Inter', sans-serif" }}
