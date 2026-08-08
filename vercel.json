@@ -1,8 +1,9 @@
 {
-  "cleanUrls": true,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!assets/|favicon.ico|api/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
