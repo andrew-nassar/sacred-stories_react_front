@@ -41,38 +41,41 @@ html.light .text-gold-accent {
 html.light .text-white {
   color: #1c1b1a !important;
 }
+html.light .text-white\/95 {
+  color: rgba(28, 27, 26, 0.95) !important;
+}
 html.light .text-white\/90 {
-  color: rgba(28, 27, 26, 0.9) !important;
+  color: rgba(28, 27, 26, 0.95) !important;
 }
 html.light .text-white\/85 {
-  color: rgba(28, 27, 26, 0.85) !important;
+  color: rgba(28, 27, 26, 0.90) !important;
 }
 html.light .text-white\/80 {
-  color: rgba(28, 27, 26, 0.8) !important;
+  color: rgba(28, 27, 26, 0.88) !important;
 }
 html.light .text-white\/75 {
-  color: rgba(28, 27, 26, 0.75) !important;
+  color: rgba(28, 27, 26, 0.85) !important;
 }
 html.light .text-white\/70 {
-  color: rgba(28, 27, 26, 0.7) !important;
+  color: rgba(28, 27, 26, 0.82) !important;
 }
 html.light .text-white\/65 {
-  color: rgba(28, 27, 26, 0.65) !important;
+  color: rgba(28, 27, 26, 0.78) !important;
 }
 html.light .text-white\/60 {
-  color: rgba(28, 27, 26, 0.6) !important;
+  color: rgba(28, 27, 26, 0.75) !important;
 }
 html.light .text-white\/50 {
-  color: rgba(28, 27, 26, 0.5) !important;
+  color: rgba(28, 27, 26, 0.70) !important;
 }
 html.light .text-white\/40 {
-  color: rgba(28, 27, 26, 0.4) !important;
+  color: rgba(28, 27, 26, 0.62) !important;
 }
 html.light .text-white\/30 {
-  color: rgba(28, 27, 26, 0.3) !important;
+  color: rgba(28, 27, 26, 0.52) !important;
 }
 html.light .text-white\/20 {
-  color: rgba(28, 27, 26, 0.2) !important;
+  color: rgba(28, 27, 26, 0.40) !important;
 }
 html.light .text-gray-300 {
   color: #4d4635 !important;
@@ -81,21 +84,173 @@ html.light .text-gray-400 {
   color: #5f5e5b !important;
 }
 
+/* Hardcoded hex classes overrides for Light Mode text & hovers */
+html.light .text-\[\#e2e2e2\] {
+  color: #1c1b1a !important;
+}
+html.light .text-\[\#e2e2e2\]\/90 {
+  color: rgba(28, 27, 26, 0.95) !important;
+}
+html.light .text-\[\#e2e2e2\]\/80 {
+  color: rgba(28, 27, 26, 0.88) !important;
+}
+html.light .text-\[\#e2e2e2\]\/70 {
+  color: rgba(28, 27, 26, 0.82) !important;
+}
+html.light .text-\[\#e2e2e2\]\/60 {
+  color: rgba(28, 27, 26, 0.75) !important;
+}
+html.light .text-\[\#e2e2e2\]\/50 {
+  color: rgba(28, 27, 26, 0.70) !important;
+}
+html.light .text-\[\#e2e2e2\]\/40 {
+  color: rgba(28, 27, 26, 0.62) !important;
+}
+html.light .text-\[\#e2e2e2\]\/30 {
+  color: rgba(28, 27, 26, 0.52) !important;
+}
+
+html.light .text-\[\#99907c\] {
+  color: #555042 !important;
+}
+html.light .text-\[\#99907c\]\/60 {
+  color: rgba(85, 80, 66, 0.62) !important;
+}
+html.light .text-\[\#99907c\]\/80 {
+  color: rgba(85, 80, 66, 0.82) !important;
+}
+
+html.light .text-\[\#d0c5af\] {
+  color: #4d4635 !important;
+}
+html.light .text-\[\#d0c5af\]\/70 {
+  color: rgba(77, 70, 53, 0.75) !important;
+}
+html.light .text-\[\#d0c5af\]\/30 {
+  color: rgba(77, 70, 53, 0.45) !important;
+}
+
+html.light .text-\[\#f2ca50\] {
+  color: #735c00 !important;
+}
+html.light .text-\[\#ffe088\] {
+  color: #8a6d00 !important;
+}
+html.light .hover\:text-\[\#ffe088\]:hover {
+  color: #8a6d00 !important;
+}
+html.light .hover\:text-\[\#f2ca50\]:hover {
+  color: #735c00 !important;
+}
+html.light .hover\:text-white:hover {
+  color: #1c1b1a !important;
+}
+html.light .hover\:text-white\/90:hover {
+  color: rgba(28, 27, 26, 0.95) !important;
+}
+html.light .hover\:text-white\/80:hover {
+  color: rgba(28, 27, 26, 0.88) !important;
+}
+html.light .group:hover .group-hover\:text-gold-accent {
+  color: #735c00 !important;
+}
+html.light .group:hover .group-hover\:text-white {
+  color: #1c1b1a !important;
+}
+
+/* Beautiful custom status badges & alerts overrides in Light Mode */
+html.light .text-emerald-500 {
+  color: #065f46 !important;
+}
+html.light .text-emerald-600 {
+  color: #047857 !important;
+}
+html.light .text-emerald-700,
+html.light .text-emerald-800 {
+  color: #065f46 !important;
+}
+html.light .bg-emerald-500\/10 {
+  background-color: rgba(6, 95, 70, 0.1) !important;
+}
+html.light .border-emerald-500\/20,
+html.light .border-emerald-600\/10 {
+  border-color: rgba(6, 95, 70, 0.25) !important;
+}
+
+html.light .text-amber-500 {
+  color: #854d0e !important;
+}
+html.light .text-amber-600 {
+  color: #a16207 !important;
+}
+html.light .text-amber-700,
+html.light .text-amber-800 {
+  color: #854d0e !important;
+}
+html.light .bg-amber-500\/10 {
+  background-color: rgba(133, 77, 14, 0.1) !important;
+}
+html.light .border-amber-500\/20 {
+  border-color: rgba(133, 77, 14, 0.25) !important;
+}
+
+html.light .text-rose-500,
+html.light .text-red-500 {
+  color: #991b1b !important;
+}
+html.light .text-rose-600,
+html.light .text-red-600 {
+  color: #b91c1c !important;
+}
+html.light .text-rose-700,
+html.light .text-red-700,
+html.light .text-red-800 {
+  color: #991b1b !important;
+}
+html.light .bg-rose-500\/10,
+html.light .bg-red-500\/10,
+html.light .bg-red-500\/15 {
+  background-color: rgba(153, 27, 27, 0.1) !important;
+}
+html.light .border-rose-500\/20,
+html.light .border-red-500\/20,
+html.light .border-red-500\/30 {
+  border-color: rgba(153, 27, 27, 0.25) !important;
+}
+
 /* Containers & Modals in Sacred Light Mode */
 html.light .glass-panel {
   background: rgba(255, 255, 255, 0.82) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid rgba(208, 197, 175, 0.5) !important;
-  box-shadow: 0 10px 30px -10px rgba(74, 58, 16, 0.05) !important;
+  box-shadow: 0 10px 30px -10px rgba(74, 58, 16, 0.08) !important;
 }
 
 html.light .glass-panel-hover:hover {
   background: rgba(255, 255, 255, 0.95) !important;
   border-color: rgba(115, 92, 0, 0.4) !important;
-  box-shadow: 0 12px 40px -12px rgba(115, 92, 0, 0.1) !important;
+  box-shadow: 0 12px 40px -12px rgba(115, 92, 0, 0.12) !important;
 }
 
+/* Glass Card styling for both Dark and Light modes */
+.glass-card {
+  background: rgba(20, 22, 22, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 35px -15px rgba(0, 0, 0, 0.3);
+}
+
+html.light .glass-card {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(208, 197, 175, 0.5) !important;
+  box-shadow: 0 10px 30px -10px rgba(74, 58, 16, 0.08) !important;
+}
+
+/* Specific background hex overrides for Light Mode */
 html.light .bg-\[\#121414\],
 html.light .bg-\[\#191b1c\],
 html.light .bg-\[\#0c0f0f\],
@@ -114,6 +269,10 @@ html.light .bg-\[\#252216\] {
 html.light .bg-\[\#1f2223\] {
   background-color: #e5e2dd !important;
   color: #1c1c19 !important;
+}
+
+html.light .bg-\[\#1e2020\] {
+  background-color: #f2edeb !important;
 }
 
 /* Keep text white in explicitly marked dark containers */
@@ -160,14 +319,15 @@ html.light #lex-location-showcase {
   border-color: rgba(208, 197, 175, 0.5) !important;
 }
 
+/* Solid visual background and border utilities for buttons & elements */
 html.light .bg-white\/5 {
-  background-color: rgba(28, 27, 26, 0.04) !important;
+  background-color: rgba(28, 27, 26, 0.05) !important;
 }
 html.light .bg-white\/10 {
-  background-color: rgba(28, 27, 26, 0.08) !important;
+  background-color: rgba(28, 27, 26, 0.09) !important;
 }
 html.light .bg-white\/15 {
-  background-color: rgba(28, 27, 26, 0.12) !important;
+  background-color: rgba(28, 27, 26, 0.14) !important;
 }
 html.light .bg-black\/40 {
   background-color: rgba(253, 248, 246, 0.7) !important;
@@ -176,15 +336,86 @@ html.light .bg-black\/60 {
   background-color: rgba(253, 248, 246, 0.85) !important;
 }
 html.light .border-white\/10 {
-  border-color: rgba(208, 197, 175, 0.5) !important;
+  border-color: rgba(74, 58, 16, 0.18) !important;
 }
 html.light .border-white\/5 {
-  border-color: rgba(208, 197, 175, 0.3) !important;
+  border-color: rgba(74, 58, 16, 0.1) !important;
 }
 html.light .border-white\/20 {
-  border-color: rgba(208, 197, 175, 0.7) !important;
+  border-color: rgba(74, 58, 16, 0.28) !important;
 }
 
+/* Golden theme background/hover utilities in Light Mode */
+html.light .bg-gold-accent\/5 {
+  background-color: rgba(115, 92, 0, 0.05) !important;
+}
+html.light .bg-gold-accent\/10 {
+  background-color: rgba(115, 92, 0, 0.1) !important;
+}
+html.light .bg-gold-accent\/20 {
+  background-color: rgba(115, 92, 0, 0.18) !important;
+}
+html.light .hover\:bg-gold-accent\/5:hover {
+  background-color: rgba(115, 92, 0, 0.08) !important;
+}
+html.light .hover\:bg-gold-accent\/10:hover {
+  background-color: rgba(115, 92, 0, 0.15) !important;
+}
+html.light .hover\:bg-white\/5:hover {
+  background-color: rgba(28, 27, 26, 0.05) !important;
+}
+html.light .hover\:bg-white\/10:hover {
+  background-color: rgba(28, 27, 26, 0.10) !important;
+}
+html.light .hover\:bg-white\/15:hover {
+  background-color: rgba(28, 27, 26, 0.15) !important;
+}
+
+/* Interactive elements in Light Mode */
+html.light .hover\:bg-white:hover {
+  background-color: #ffffff !important;
+  color: #1c1b1a !important;
+}
+html.light .hover\:bg-gold-accent:hover {
+  background-color: #735c00 !important;
+  color: #fdf8f6 !important;
+}
+
+/* Deliberate disabled button appearance in Light Mode */
+html.light button:disabled,
+html.light .disabled\:from-white\/5:disabled,
+html.light .disabled\:to-white\/5:disabled {
+  background: #ece7e5 !important;
+  color: #a09a8e !important;
+  border-color: #d0c5af !important;
+  cursor: not-allowed !important;
+}
+
+/* Custom input-glass classes for auth and form inputs */
+.input-glass {
+  background-color: rgba(20, 22, 22, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e2e2;
+  transition: all 0.3s ease;
+}
+.input-glass:focus {
+  border-color: rgba(242, 202, 80, 0.5) !important;
+  outline: none;
+}
+
+html.light .input-glass {
+  background-color: #ffffff !important;
+  border: 1px solid #d0c5af !important;
+  color: #1c1b1a !important;
+}
+html.light .input-glass:focus {
+  border-color: #735c00 !important;
+}
+html.light .input-glass::placeholder {
+  color: rgba(77, 70, 53, 0.5) !important;
+}
+
+/* Forms & inputs focus ring overrides in Light Mode */
 html.light input, html.light textarea, html.light select {
   background-color: #ffffff !important;
   color: #1c1b1a !important;
@@ -192,6 +423,11 @@ html.light input, html.light textarea, html.light select {
 }
 html.light input::placeholder, html.light textarea::placeholder {
   color: rgba(28, 27, 26, 0.45) !important;
+}
+html.light input:focus, html.light textarea:focus, html.light select:focus {
+  border-color: #735c00 !important;
+  box-shadow: 0 0 0 2px rgba(115, 92, 0, 0.15) !important;
+  outline: none !important;
 }
 
 html.light .scrollbar-track,

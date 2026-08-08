@@ -1,20 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useConfirmEmail } from '../hooks/use-confirm-email';
 
 export const ConfirmEmailPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const userId = searchParams.get('userId') || '';
+  const email = searchParams.get('email') || searchParams.get('userId') || '';
   const token = searchParams.get('token') || '';
 
   const { isLoading, isConfirmed, isExpired, error, confirmEmail } = useConfirmEmail();
+  const hasTriggered = useRef(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (userId && token) {
-      confirmEmail(userId, token);
+    if (!email || !token) {
+      setValidationError('Invalid verification link. The email or verification token is missing.');
+      return;
     }
-  }, [userId, token, confirmEmail]);
+
+    if (!hasTriggered.current) {
+      hasTriggered.current = true;
+      confirmEmail(email, token);
+    }
+  }, [email, token, confirmEmail]);
 
   return (
     <div className="min-h-screen w-full bg-[#121414] text-[#e2e2e2] font-sans-body flex flex-col justify-between items-center px-4 py-10 relative overflow-hidden">
@@ -32,7 +40,7 @@ export const ConfirmEmailPage: React.FC = () => {
       {/* Main Content */}
       <main className="relative z-10 w-full max-w-lg my-auto flex flex-col items-center text-center">
         {/* State 1: Loading */}
-        {isLoading && (
+        {isLoading && !validationError && (
           <div className="space-y-6 animate-pulse">
             <div className="w-20 h-20 mx-auto rounded-full border border-[#f2ca50]/30 flex items-center justify-center bg-[#1e2020]">
               <span className="material-symbols-outlined text-4xl text-[#f2ca50] animate-spin">
@@ -49,7 +57,7 @@ export const ConfirmEmailPage: React.FC = () => {
         )}
 
         {/* State 2: Verification Complete (Success) */}
-        {!isLoading && isConfirmed && (
+        {!isLoading && isConfirmed && !validationError && (
           <div className="space-y-8 w-full">
             {/* Top Badge */}
             <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
@@ -96,7 +104,7 @@ export const ConfirmEmailPage: React.FC = () => {
         )}
 
         {/* State 3: Link Expired or Error */}
-        {!isLoading && (!isConfirmed || isExpired) && (
+        {!isLoading && (!isConfirmed || isExpired || validationError) && (
           <div className="space-y-8 w-full">
             {/* Expired Link Icon */}
             <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
@@ -110,12 +118,12 @@ export const ConfirmEmailPage: React.FC = () => {
             {/* Titles */}
             <div className="space-y-3">
               <h1 className="font-serif-display text-4xl md:text-5xl font-semibold tracking-tight text-[#e2e2e2]">
-                Link Expired
+                {validationError ? 'Invalid Link' : 'Link Expired'}
               </h1>
               <p className="font-sans-body text-base text-[#d0c5af] max-w-md mx-auto leading-relaxed">
-                The confirmation link is no longer valid. For security, these links expire after 24 hours.
+                {validationError || 'The confirmation link is no longer valid. For security, these links expire after 24 hours.'}
               </p>
-              {error && (
+              {error && !validationError && (
                 <p className="font-mono-label text-xs text-[#ffb4ab]/90 pt-1">
                   [{error}]
                 </p>

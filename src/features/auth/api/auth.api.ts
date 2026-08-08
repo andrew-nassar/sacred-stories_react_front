@@ -71,14 +71,14 @@ export class AuthApi {
   }
 
   public static async confirmEmail(
-    userId: string,
+    email: string,
     token: string
   ): Promise<ApiResponse<ConfirmEmailResponse>> {
     try {
       const response = await apiClient.get<ApiResponse<ConfirmEmailResponse>>(
         API_ENDPOINTS.AUTH.CONFIRM_EMAIL,
         {
-          params: { userId, token },
+          params: { email, token },
         }
       );
       return response.data;

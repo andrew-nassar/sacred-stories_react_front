@@ -9,7 +9,7 @@ export interface UseConfirmEmailResult {
   isExpired: boolean;
   error: string | null;
   confirmData: ConfirmEmailResponse | null;
-  confirmEmail: (userId: string, token: string) => Promise<ConfirmEmailResponse | null>;
+  confirmEmail: (email: string, token: string) => Promise<ConfirmEmailResponse | null>;
 }
 
 export function useConfirmEmail(): UseConfirmEmailResult {
@@ -20,8 +20,8 @@ export function useConfirmEmail(): UseConfirmEmailResult {
   const [confirmData, setConfirmData] = useState<ConfirmEmailResponse | null>(null);
 
   const confirmEmail = useCallback(
-    async (userId: string, token: string): Promise<ConfirmEmailResponse | null> => {
-      if (!userId || !token) {
+    async (email: string, token: string): Promise<ConfirmEmailResponse | null> => {
+      if (!email || !token) {
         setError('Invalid or missing confirmation parameters.');
         setIsExpired(true);
         return null;
@@ -33,7 +33,7 @@ export function useConfirmEmail(): UseConfirmEmailResult {
       setIsExpired(false);
 
       try {
-        const response = await AuthApi.confirmEmail(userId, token);
+        const response = await AuthApi.confirmEmail(email, token);
         if (response.succeeded && response.data?.isConfirmed) {
           setIsConfirmed(true);
           setConfirmData(response.data);

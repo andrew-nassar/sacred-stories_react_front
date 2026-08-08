@@ -15,7 +15,7 @@ export interface AuthTokens {
 }
 
 export interface ConfirmEmailParams {
-  userId: string;
+  email: string;
   token: string;
 }
 

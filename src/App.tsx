@@ -8,7 +8,7 @@ import { AppProviders } from "./app/providers/AppProviders";
 import { useIsMobile } from "./shared/services/useIsMobile";
 import ArchivistChat from "./features/chat/ArchivistChat";
 import MainContent from "./features/navigation/MainContent";
-import { LoginPage, RegisterPage , ResendVerificationPage } from "./features/auth"; // استيراد صفحات الدخول والتسجيل المستقلة
+import { ConfirmEmailPage, EmailVerificationPage, LoginPage, RegisterPage , ResendVerificationPage } from "./features/auth"; // استيراد صفحات الدخول والتسجيل المستقلة
 import AdminIndexPage from "./features/admin/AdminIndexPage";
 import CreateStoryPage from "./features/create-story/pages/CreateStoryPage";
 import { PublicRoute, AuthenticatedRoute } from "./shared/auth/authGuard";
@@ -82,6 +82,10 @@ export default function App() {
           <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
           {/* صفحة إعادة إرسال البريد الإلكتروني للتحقق */}
           <Route path="/resend-verification" element={<ResendVerificationPage />} />
+             {/* صفحة التحقق من البريد الإلكتروني بعد التسجيل */}
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
+          {/* صفحة تأكيد البريد الإلكتروني الفعلي من الرابط المرسل */}
+          <Route path="/confirm-email" element={<ConfirmEmailPage />} />
         </Routes>
       </BrowserRouter>
     </AppProviders>
