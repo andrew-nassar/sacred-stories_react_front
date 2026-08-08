@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLogout } from '../../../auth/hooks/use-logout';
 
 export default function DesktopRequired() {
   const navigate = useNavigate();
+  const { logout } = useLogout();
 
   useEffect(() => {
     // Micro-interaction for the button
@@ -148,8 +150,9 @@ export default function DesktopRequired() {
           {/* CTA Section */}
           <div className="pt-8 flex flex-col items-center gap-4">
             <button 
-              onClick={() => {
-                navigate('/');
+              onClick={async () => {
+                await logout();
+                // navigate('/');
               }}
               className="sacred-button px-10 py-4 bg-[#f2ca50] text-[#3c2f00] font-semibold rounded-lg flex items-center gap-2 group cursor-pointer"
               style={{ fontFamily: "'Inter', sans-serif" }}
