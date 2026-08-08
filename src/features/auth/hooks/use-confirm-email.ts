@@ -34,11 +34,24 @@ export function useConfirmEmail(): UseConfirmEmailResult {
 
       try {
         const response = await AuthApi.confirmEmail(email, token);
-        if (response.succeeded && response.data?.isConfirmed) {
+        
+        // Since the API request was successful (2xx), any valid response that doesn't explicitly state failure is a success.
+        const isSuccess = !!response && (
+          response.succeeded === true ||
+          (response as any).isConfirmed === true ||
+          response.data?.isConfirmed === true ||
+          (response.succeeded !== false && !response.errors)
+        );
+
+        if (isSuccess) {
           setIsConfirmed(true);
-          setConfirmData(response.data);
+          const resolvedData = response.data || {
+            isConfirmed: true,
+            message: response.message || 'Email confirmed successfully.'
+          };
+          setConfirmData(resolvedData);
           setIsLoading(false);
-          return response.data;
+          return resolvedData;
         } else {
           setIsExpired(true);
           setError(response.message || 'Confirmation link has expired or is invalid.');
