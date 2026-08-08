@@ -11,8 +11,12 @@ import Sidebar from './shared/components/Sidebar';
 import { PortalUser } from './shared/types';
 import { AuthApi } from '../auth/api/auth.api';
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from '../../shared/services/useIsMobile';
+import DesktopRequired from './shared/components/DesktopRequired';
+
 const ALLOWED_ADMIN_ROLES = ['Admin', 'Archivist', 'Chief Editor'];
 export default function AdminIndexPage() {
+  const isMobile = useIsMobile(1024); // Mobile or tablet/small screens require desktop
   const [currentView, setCurrentView] = useState<string>('dashboard');
     const navigate = useNavigate();
 
@@ -120,6 +124,11 @@ export default function AdminIndexPage() {
         );
     }
   };
+
+  // 0. Mobile Screen Constraint State
+  if (isMobile) {
+    return <DesktopRequired />;
+  }
 
   // 1. Not Authenticated State
   if (!isAuthenticated || !currentUser) {
